@@ -1,0 +1,9 @@
+/* Basic reset */
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
+#game{max-width:400px;margin:auto;text-align:center;padding-top:20px;}
+#board{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:10px auto;width:90%;}
+#board button{width:100%;padding:0;height:80px;font-size:2rem;background:#f9f9f9;border:1px solid #ccc;border-radius:4px;cursor:pointer;transition:background 0.3s;}
+#board button:hover:not(.disabled){background:#eaeaea;}
+#turn{margin-top:10px;margin-bottom:5px;font-weight:bold;}
+#resetBtn{padding:8px 16px;background:#007bff;color:white;border:none;border-radius:4px;cursor:pointer;margin-top:10px;}
+#resetBtn:hover{background:#0056b3;}

@@ -1,0 +1,92 @@
+{
+  "코딩 기획자": [
+    {
+      "content": "Develop a simple web-based Tetris game using HTML, CSS, and JavaScript. The project should follow the full pipeline: requirement analysis/planning, implementation (coding), and quality assurance (test",
+      "status": "completed"
+    },
+    {
+      "content": "Analyze requirements and create work plan",
+      "status": "completed"
+    },
+    {
+      "content": "Set up project structure and basic HTML/CSS boilerplate",
+      "status": "completed"
+    },
+    {
+      "content": "Implement core game engine (Tetromino shapes, Grid, Movement)",
+      "status": "completed"
+    },
+    {
+      "content": "Implement collision detection and rotation logic",
+      "status": "completed"
+    },
+    {
+      "content": "Implement line clearing, scoring, and level system",
+      "status": "completed"
+    },
+    {
+      "content": "Develop UI components (Next piece preview, Scoreboard, Controls)",
+      "status": "completed"
+    },
+    {
+      "content": "Testing and QA (bug fixing, performance optimization)",
+      "status": "completed"
+    }
+  ],
+  "코딩 개발자": [
+    {
+      "content": "# 작업계획서: Web-based Tetris Game 개발\n\n## 1. 프로젝트 개요\n본 프로젝트는 웹 브라우저에서 별도의 설치 없이 실행 가능한 클래식한 **Tetris(테트리스) 게임**을 개발하는 것을 목표로 합니다. HTML5, CSS3, 그리고 Vanilla JavaScript를 사용하여 성능이 뛰어나고 구조가 명확한 게임 엔진을 구축합니다.\n\n",
+      "status": "completed"
+    },
+    {
+      "content": "Analyze requirements and create work plan",
+      "status": "completed"
+    },
+    {
+      "content": "Set up project structure and basic HTML/CSS boilerplate",
+      "status": "completed"
+    },
+    {
+      "content": "Implement core game engine (Tetromino shapes, Grid, Movement)",
+      "status": "completed"
+    },
+    {
+      "content": "Implement collision detection and rotation logic",
+      "status": "completed"
+    },
+    {
+      "content": "Implement line clearing, scoring, and level system",
+      "status": "completed"
+    },
+    {
+      "content": "Develop UI components (Next piece preview, Scoreboard, Controls)",
+      "status": "completed"
+    },
+    {
+      "content": "Testing and QA (bug fixing, performance optimization)",
+      "status": "completed"
+    },
+    {
+      "content": "웹 기반 테트리스 게임 개발을 완료했습니다.\n\n### 생성/수정한 파일 목록\n- `index.html`: 게임의 기본 HTML 구조 및 스크립트 연결.\n- `src/style.css`: 게임 컨테이너 및 캔버스 스타일링.\n- `src/tetrominoes.js`: 테트리미노 모양 및 색상 정의.\n- `src/collision.js`: 충돌 감지 로직.\n- ",
+      "status": "completed"
+    },
+    {
+      "content": "\n- 벽면 충돌 및 블록 중첩 방지 로직이 안정적으로 작동합니다.\n\n이제 모든 핵심 기능(P0, P1)이 구현되었습니다. (P2, P3는 향후 확장 가능)",
+      "status": "completed"
+    }
+  ],
+  "코딩 검수자": [
+    {
+      "content": "웹 기반 테트리스 게임 개발을 완료했습니다.\n\n### 생성/수정한 파일 목록\n- `index.html`: 게임의 기본 HTML 구조 및 스크립트 연결.\n- `src/style.css`: 게임 컨테이너 및 캔버스 스타일링.\n- `src/tetrominoes.js`: 테트리미노 모양 및 색상 정의.\n- `src/collision.js`: 충돌 감지 로직.\n- ",
+      "status": "completed"
+    },
+    {
+      "content": "테트리스 게임의 기능(회전, 라인 삭제, 점수 시스템)을 완성하고 코드를 개선했습니다.\n\n### 수정된 파일 목록\n- `src/game.js`: 게임 엔진 로직을 전면 재작성하여 블록 회전(Q, W 키), 라인 삭제, 점수 시스템, 랜덤 블록 생성 기능을 구현했습니다.\n- `src/ui.js`: 점수를 실시간으로 화면에 업데이트하도록 수정했습니다.\n\n###",
+      "status": "completed"
+    },
+    {
+      "content": "웹 기반 테트리스 게임 개발을 완료하고 최종 작업결과서를 작성하였습니다.\n\n### 작업 요약\n- **생성/수정한 파일**: `index.html`, `src/style.css`, `src/tetrominoes.js`, `src/collision.js`, `src/game.js`, `src/ui.js`, `output/작업결과서.md`\n- **구현 기능**:",
+      "status": "completed"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "코딩 기획자": [
+    {
+      "content": "Analyze user requirements",
+      "status": "completed"
+    },
+    {
+      "content": "Define project overview and scope",
+      "status": "completed"
+    },
+    {
+      "content": "Select technology stack (HTML/CSS/JS)",
+      "status": "completed"
+    },
+    {
+      "content": "Design file structure under src/",
+      "status": "completed"
+    },
+    {
+      "content": "Specify UI components and layout",
+      "status": "completed"
+    },
+    {
+      "content": "Implement game logic and state management",
+      "status": "completed"
+    },
+    {
+      "content": "Add win/draw detection algorithms",
+      "status": "completed"
+    },
+    {
+      "content": "Integrate UI with logic, add event handlers",
+      "status": "completed"
+    },
+    {
+      "content": "Test functionality and edge cases",
+      "status": "completed"
+    }
+  ]
+}

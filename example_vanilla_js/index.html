@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고객 조회 — zio_ontology.js 예제</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f1117;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        /* 헤더 */
+        .header {
+            background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.08));
+            border-bottom: 1px solid #1e2130;
+            padding: 28px 32px;
+        }
+        .header h1 {
+            font-size: 24px; font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .header p { color: #888; font-size: 14px; }
+        .header code {
+            background: rgba(255,255,255,0.08); padding: 2px 8px;
+            border-radius: 4px; font-size: 13px; color: #a0cfff;
+        }
+
+        /* 레이아웃 */
+        .main { display: flex; min-height: calc(100vh - 90px); }
+
+        /* 사이드바 */
+        .sidebar {
+            width: 280px; min-width: 280px;
+            background: rgba(255,255,255,0.02);
+            border-right: 1px solid #1e2130;
+            padding: 20px 16px;
+        }
+        .sidebar h3 {
+            font-size: 12px; font-weight: 600; color: #666;
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        .menu-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s;
+            margin-bottom: 4px; font-size: 14px; color: #aaa;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.05); color: #ddd; }
+        .menu-item.active {
+            background: rgba(99,102,241,0.15); color: #a0cfff;
+            border: 1px solid rgba(99,102,241,0.3);
+        }
+        .menu-item .icon { font-size: 18px; }
+
+        /* 코드 미리보기 */
+        .code-preview {
+            background: rgba(0,0,0,0.4); border: 1px solid #2a2d35;
+            border-radius: 10px; padding: 14px; margin-top: 20px;
+            font-size: 12px; line-height: 1.7; color: #8be9fd;
+            overflow-x: auto; white-space: pre;
+        }
+        .code-preview .cmt { color: #6272a4; }
+        .code-preview .kw { color: #ff79c6; }
+        .code-preview .fn { color: #50fa7b; }
+        .code-preview .str { color: #f1fa8c; }
+
+        /* 콘텐츠 */
+        .content { flex: 1; padding: 24px 32px; overflow-x: auto; }
+        .content-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px;
+        }
+        .content-header h2 { font-size: 20px; font-weight: 600; color: #e0e0e0; }
+        .badge {
+            background: rgba(99,102,241,0.15); color: #a0cfff;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+        }
+
+        /* 로딩/에러 */
+        .status {
+            text-align: center; padding: 60px 20px;
+            color: #888; font-size: 15px;
+        }
+        .status.error { color: #fca5a5; }
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid #333;
+            border-top-color: #6366f1; border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 통계 바 */
+        .stats-bar {
+            display: flex; gap: 8px; align-items: center;
+            font-size: 13px; color: #888; margin-top: 12px;
+        }
+        .stats-bar span { color: #a0cfff; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔗 zio_ontology.js SDK 예제</h1>
+        <p>서버(main.py) 없이, <code>&lt;script src="/api/sdk/zio_ontology.js"&gt;</code> 하나로 온톨로지 데이터를 조회합니다.</p>
+    </div>
+
+    <div class="main">
+        <!-- 사이드바: 예제 메뉴 -->
+        <div class="sidebar">
+            <h3>SDK 예제</h3>
+            <div class="menu-item active" onclick="runExample('customers', this)">
+                <span class="icon">👤</span> 고객 목록 조회
+            </div>
+            <div class="menu-item" onclick="runExample('senders', this)">
+                <span class="icon">📨</span> 발신자 조회
+            </div>
+            <div class="menu-item" onclick="runExample('tickets', this)">
+                <span class="icon">🎫</span> 티켓 조회
+            </div>
+            <div class="menu-item" onclick="runExample('relations', this)">
+                <span class="icon">🔗</span> 관계 탐색 (out)
+            </div>
+
+            <!-- 실행 중인 코드 미리보기 -->
+            <div id="code-preview" class="code-preview">
+<span class="cmt">// 좌측 메뉴를 선택하세요</span></div>
+        </div>
+
+        <!-- 메인: 결과 표시 -->
+        <div class="content">
+            <div class="content-header">
+                <h2 id="content-title">예제를 선택하세요</h2>
+                <span class="badge" id="badge" style="display:none;">0건</span>
+            </div>
+            <div id="result-area">
+                <div class="status">👈 좌측 메뉴에서 예제를 선택하면 SDK가 데이터를 조회합니다.</div>
+            </div>
+            <div class="stats-bar" id="stats" style="display:none;">
+                소요 시간: <span id="stat-time">0</span>ms
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SDK 로드 ═══ -->
+    <script src="/api/sdk/zio_ontology.js"></script>
+    <script>
+        // ─────────────────────────────────────────────────────
+        // 예제 정의: 각 메뉴에 대응하는 SDK 호출 코드
+        // ─────────────────────────────────────────────────────
+        const examples = {
+            customers: {
+                title: "👤 고객 목록",
+                code: `<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">Zio.Graph</span>
+  .<span class="fn">node</span>(<span class="str">"Customer"</span>)
+  .<span class="fn">fetch</span>();`,
+                run: () => Zio.Graph.node("Customer").fetch(),
+                render: "cards",
+                titleKey: "name"
+            },
+            senders: {
+                title: "📨 발신자 목록",
+                code: `<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">Zio.Graph</span>
+  .<span class="fn">node</span>(<span class="str">"Sender"</span>)
+  .<span class="fn">fetch</span>();`,
+                run: () => Zio.Graph.node("Sender").fetch(),
+                render: "table"
+            },
+            tickets: {
+                title: "🎫 티켓 목록",
+                code: `<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">Zio.Graph</span>
+  .<span class="fn">node</span>(<span class="str">"Ticket"</span>)
+  .<span class="fn">fetch</span>();`,
+                run: () => Zio.Graph.node("Ticket").fetch(),
+                render: "table"
+            },
+            relations: {
+                title: "🔗 고객 → 관계 탐색",
+                code: `<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">Zio.Graph</span>
+  .<span class="fn">node</span>(<span class="str">"Customer"</span>)
+  .<span class="fn">out</span>(<span class="str">"SUBMITTED"</span>)
+  .<span class="fn">fetch</span>();`,
+                run: () => Zio.Graph.node("Customer").out("SUBMITTED").fetch(),
+                render: "table"
+            }
+        };
+
+        // ─────────────────────────────────────────────────────
+        // 예제 실행
+        // ─────────────────────────────────────────────────────
+        async function runExample(key, el) {
+            // 메뉴 활성화
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            el.classList.add('active');
+
+            const ex = examples[key];
+            document.getElementById('content-title').textContent = ex.title;
+            document.getElementById('code-preview').innerHTML = ex.code;
+            document.getElementById('badge').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('result-area').innerHTML =
+                '<div class="status"><div class="spinner"></div>데이터를 조회하고 있습니다...</div>';
+
+            const t0 = performance.now();
+            try {
+                const result = await ex.run();
+                const elapsed = Math.round(performance.now() - t0);
+
+                if (ex.render === 'cards') {
+                    Zio.renderCards('#result-area', result, { titleKey: ex.titleKey });
+                } else {
+                    Zio.renderTable('#result-area', result);
+                }
+
+                document.getElementById('badge').textContent = result.length + '건';
+                document.getElementById('badge').style.display = 'inline';
+                document.getElementById('stats').style.display = 'flex';
+                document.getElementById('stat-time').textContent = elapsed;
+            } catch (e) {
+                document.getElementById('result-area').innerHTML =
+                    '<div class="status error">❌ ' + e.message + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>

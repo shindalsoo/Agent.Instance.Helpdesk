@@ -1,0 +1,12 @@
+# Ontology Dashboard 의존성 패키지 목록
+# ----------------------------------------------------
+# 샌드박스 내부에서 백엔드 라이브러리(zio_ontology) 및 
+# DB 연동(PSQL, Neo4j)을 수행하기 위해 필수적인 패키지들을 명시합니다.
+
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+neo4j
+pandas
+pydantic

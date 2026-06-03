@@ -1,0 +1,76 @@
+{
+  "코딩 기획자": [
+    {
+      "content": "Create a simple web-based 2048 game that can be played directly in the browser without any downloads or installations.",
+      "status": "completed"
+    },
+    {
+      "content": "Analyze requirements",
+      "status": "completed"
+    },
+    {
+      "content": "Define project overview and goals",
+      "status": "completed"
+    },
+    {
+      "content": "Select technology stack (HTML/CSS/JS)",
+      "status": "completed"
+    },
+    {
+      "content": "Design file structure under src/",
+      "status": "completed"
+    },
+    {
+      "content": "Detail feature specifications: grid, input handling, merging logic, score, restart",
+      "status": "completed"
+    },
+    {
+      "content": "Set implementation priority order",
+      "status": "completed"
+    }
+  ],
+  "코딩 개발자": [
+    {
+      "content": "# 작업계획서\n\n## 프로젝트 개요\n- **프로젝트명**: 2048 Web Edition  \n- **목표**: 브라우저에서 다운로드나 설치 없이 바로 플레이할 수 있는 간단한 2048 게임 구현  \n- **핵심 기능**:\n  - 4x4 격자 표시  \n  - 화살표 키(또는 WASD) 입력으로 블록 이동  \n  - 같은 숫자의 블록이 합쳐질 때 점수 증가  ",
+      "status": "completed"
+    },
+    {
+      "content": "Create src/style.css",
+      "status": "completed"
+    },
+    {
+      "content": "Create src/utils.js",
+      "status": "completed"
+    },
+    {
+      "content": "Create src/board.js",
+      "status": "completed"
+    },
+    {
+      "content": "Create src/app.js",
+      "status": "completed"
+    },
+    {
+      "content": "**Note:** 아래 코드는 최소한의 기능(격자 렌더링, 초기 두 블록 생성 및 재시작 버튼)을 구현하고 있습니다. 추가 로직(키 입력, 이동/병합, 점수 계산 등)은 필요에 따라 확장할 수 있습니다.\n\n---\n\n## `src/style.css`\n\n```css\n/* ──────────────────────────────────────── */\n/* 204",
+      "status": "completed"
+    },
+    {
+      "content": "**생성/수정한 파일 목록**\n\n- `index.html`  \n- `src/style.css`  \n- `src/utils.js`  \n- `src/board.js`  \n- `src/app.js`\n\n---\n\n**구현한 기능 설명**\n\n1. **기본 HTML 구조** (`index.html`)  \n   - 게임 타이틀, 점수 표시, 재시작 버튼, 격자 컨테이너 ",
+      "status": "completed"
+    }
+  ],
+  "코딩 검수자": [
+    {
+      "content": "**Note:** 아래 코드는 최소한의 기능(격자 렌더링, 초기 두 블록 생성 및 재시작 버튼)을 구현하고 있습니다. 추가 로직(키 입력, 이동/병합, 점수 계산 등)은 필요에 따라 확장할 수 있습니다.\n\n---\n\n## `src/style.css`\n\n```css\n/* ──────────────────────────────────────── */\n/* 204",
+      "status": "completed"
+    },
+    {
+      "content": "**생성/수정한 파일 목록**\n\n- `index.html`  \n- `src/style.css`  \n- `src/utils.js`  \n- `src/board.js`  \n- `src/app.js`\n\n---\n\n**구현한 기능 설명**\n\n1. **기본 HTML 구조** (`index.html`)  \n   - 게임 타이틀, 점수 표시, 재시작 버튼, 격자 컨테이너 ",
+      "status": "completed"
+    },
+    {
+      "content": "Implemented the basic 2048 web‑game skeleton:\n\n- **index.html** – UI 레이아웃 및 모듈 스크립트 연결  \n- **src/style.css** – 격자와 블록 기본 스타일 (Flexbox + Grid)  \n- **src/utils.js** – 빈 셀 찾기, 랜덤 타일 추가 함수  \n- **src/board",
+      "status": "completed"
+    }
+  ]
+}

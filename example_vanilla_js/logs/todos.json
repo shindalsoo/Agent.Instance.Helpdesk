@@ -1,0 +1,108 @@
+{
+  "코딩 기획자": [
+    {
+      "content": "Create a simple Tetris game using only HTML, CSS, and JavaScript that can be played in a web browser.",
+      "status": "completed"
+    },
+    {
+      "content": "Analyze requirements",
+      "status": "completed"
+    },
+    {
+      "content": "Define project overview and scope",
+      "status": "completed"
+    },
+    {
+      "content": "Select technology stack (HTML, CSS, JS)",
+      "status": "completed"
+    },
+    {
+      "content": "Design file structure under src/",
+      "status": "completed"
+    },
+    {
+      "content": "Specify game components: board, pieces, controls",
+      "status": "completed"
+    },
+    {
+      "content": "Detail rendering logic and collision detection",
+      "status": "completed"
+    },
+    {
+      "content": "Outline event handling and game loop",
+      "status": "completed"
+    },
+    {
+      "content": "Plan responsive design considerations",
+      "status": "completed"
+    },
+    {
+      "content": "Determine deployment steps (index.html)",
+      "status": "completed"
+    }
+  ],
+  "코딩 개발자": [
+    {
+      "content": "# Tetris – Simple Web‑Browser Game\n\n## Project Overview  \nA classic Tetris clone that runs entirely in the browser using only **HTML, CSS, and vanilla JavaScript**.  \nThe game is playable with keyboar",
+      "status": "completed"
+    },
+    {
+      "content": " 필요하신 경우 기능 확장이나 세부 개선 요청 주세요!",
+      "status": "completed"
+    },
+    {
+      "content": "Implement collision detection function",
+      "status": "completed"
+    },
+    {
+      "content": "Implement piece rotation logic",
+      "status": "completed"
+    },
+    {
+      "content": "Implement game loop with automatic descent",
+      "status": "completed"
+    },
+    {
+      "content": "Implement line clearing and score tracking",
+      "status": "completed"
+    },
+    {
+      "content": "Implement game over condition and UI updates",
+      "status": "completed"
+    },
+    {
+      "content": "작업이 성공적으로 완료되었습니다. 테트리스 게임의 핵심 기능들이 구현되었습니다.\n\n### 생성/수정한 파일 목록\n- `index.html`: `utils.js` 추가\n- `src/js/utils.js`: `collide`, `playerRotate` 함수 구현\n- `src/js/game.js`: 게임 루프, 충돌 감지, 이동, 회전 로직 통합\n\n### 구현",
+      "status": "completed"
+    },
+    {
+      "content": "Update piece generation to use random pieces",
+      "status": "completed"
+    },
+    {
+      "content": "Add score and level tracking logic",
+      "status": "completed"
+    },
+    {
+      "content": "Implement Game Over logic",
+      "status": "completed"
+    },
+    {
+      "content": "Add next piece preview UI",
+      "status": "completed"
+    }
+  ],
+  "코딩 검수자": [
+    {
+      "content": "작업을 완료했습니다.\n\n### 생성/수정한 파일 목록\n- `index.html`: 게임의 기본 구조(HTML)와 스타일/스크립트 연결\n- `src/css/style.css`: 게임 화면 및 UI 스타일링\n- `src/js/piece.js`: 테트리스 블록(Tetromino) 정의 및 회전 로직\n- `src/js/board.js`: 게임 보드 관리 및 행 삭",
+      "status": "completed"
+    },
+    {
+      "content": "작업이 성공적으로 완료되었습니다. 테트리스 게임의 핵심 기능들이 구현되었습니다.\n\n### 생성/수정한 파일 목록\n- `index.html`: `utils.js` 추가\n- `src/js/utils.js`: `collide`, `playerRotate` 함수 구현\n- `src/js/game.js`: 게임 루프, 충돌 감지, 이동, 회전 로직 통합\n\n### 구현",
+      "status": "completed"
+    },
+    {
+      "content": "작업을 완료했습니다. 테트리스 게임의 기능을 고도화하였습니다.\n\n### 수정된 주요 내용\n- **랜덤 블록 생성**: `playerReset` 함수를 통해 매번 새로운 테트리스 조각이 랜덤하게 생성됩니다.\n- **점수 시스템**: 행 삭제 시 점수가 증가하며 UI에 즉시 반영됩니다.\n- **게임 오버**: 새로운 블록이 생성될 때 보드와 충돌하면 자동으로 ",
+      "status": "completed"
+    }
+  ]
+}

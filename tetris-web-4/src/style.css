@@ -1,0 +1,53 @@
+body {
+    background: #202028;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#game-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+canvas {
+    border: 2px solid #fff;
+    background-color: #000;
+}
+
+#ui {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 150px;
+}
+
+#score {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+button {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background: #fff;
+    border: none;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #ddd;
+}
+
+#game-over {
+    display: none;
+    color: red;
+    font-size: 24px;
+    font-weight: bold;
+}

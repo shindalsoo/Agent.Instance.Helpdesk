@@ -1,0 +1,1 @@
+export function getEmptyCells(grid){const empty=[];for(let r=0;r<4;r++){for(let c=0;c<4;c++){if(grid[r][c]===null) empty.push([r,c]);}}return empty;}export function addRandomTile(grid){const empty=getEmptyCells(grid);if(empty.length===0)return false;const [r,c]=empty[Math.floor(Math.random()*empty.length)];grid[r][c]=Math.random()<0.9?2:4;return true;}

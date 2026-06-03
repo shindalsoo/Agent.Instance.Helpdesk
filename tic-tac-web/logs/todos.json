@@ -1,0 +1,72 @@
+{
+  "코딩 기획자": [
+    {
+      "content": "Develop a simple web-based Tic‑Tac‑Toe game that can be played directly in the browser, no downloads required.",
+      "status": "completed"
+    },
+    {
+      "content": "Analyze requirements",
+      "status": "completed"
+    },
+    {
+      "content": "Define project overview and goals",
+      "status": "completed"
+    },
+    {
+      "content": "Select technology stack",
+      "status": "completed"
+    },
+    {
+      "content": "Design file structure",
+      "status": "completed"
+    },
+    {
+      "content": "Specify features and functionality",
+      "status": "completed"
+    },
+    {
+      "content": "Prioritize implementation steps",
+      "status": "completed"
+    }
+  ],
+  "코딩 개발자": [
+    {
+      "content": "# 프로젝트 개요\n**Tic‑Tac‑Toe (XO) Web Game**\n\n- **목표**: 사용자가 별도의 다운로드 없이 브라우저에서 바로 즐길 수 있는 간단한 3x3 Tic‑Tac‑Toe 게임 구현  \n- **특징**:\n  - 2인 동시 플레이(로컬, 동일 장치)\n  - 승리/무승부 판정\n  - 재시작 버튼\n  - 최소 UI (버튼 또는 CSS 그리드)\n",
+      "status": "completed"
+    },
+    {
+      "content": "Create src/index.html",
+      "status": "completed"
+    },
+    {
+      "content": "Create src/styles.css",
+      "status": "completed"
+    },
+    {
+      "content": "Create src/app.js",
+      "status": "completed"
+    },
+    {
+      "content": "**완료된 파일 목록**\n\n| 경로 | 내용 |\n|------|------|\n| `src/index.html` | 기본 HTML 구조와 UI(타이틀, 턴 표시, 보드 컨테이너, 재시작 버튼) |\n| `src/styles.css` | 그리드 기반 보드 스타일 및 전반적인 레이아웃 |\n| `src/app.js` | 게임 로직: 초기화, 클릭 처리, 승자/무승부",
+      "status": "completed"
+    },
+    {
+      "content": "**완료된 파일 목록**\n\n| 경로 | 내용 |\n|------|------|\n| `src/index.html` | 기본 UI(타이틀, 턴 표시, 보드 컨테이너, 재시작 버튼) |\n| `src/styles.css` | 그리드 기반 보드 스타일 및 전반적인 레이아웃 |\n| `src/app.js` | 게임 로직: 초기화, 클릭 처리, 승자/무승부 판정, 리셋 기",
+      "status": "completed"
+    }
+  ],
+  "코딩 검수자": [
+    {
+      "content": "**완료된 파일 목록**\n\n| 경로 | 내용 |\n|------|------|\n| `src/index.html` | 기본 HTML 구조와 UI(타이틀, 턴 표시, 보드 컨테이너, 재시작 버튼) |\n| `src/styles.css` | 그리드 기반 보드 스타일 및 전반적인 레이아웃 |\n| `src/app.js` | 게임 로직: 초기화, 클릭 처리, 승자/무승부",
+      "status": "completed"
+    },
+    {
+      "content": "**완료된 파일 목록**\n\n| 경로 | 내용 |\n|------|------|\n| `src/index.html` | 기본 UI(타이틀, 턴 표시, 보드 컨테이너, 재시작 버튼) |\n| `src/styles.css` | 그리드 기반 보드 스타일 및 전반적인 레이아웃 |\n| `src/app.js` | 게임 로직: 초기화, 클릭 처리, 승자/무승부 판정, 리셋 기",
+      "status": "completed"
+    },
+    {
+      "content": "완료되었습니다!",
+      "status": "completed"
+    }
+  ]
+}

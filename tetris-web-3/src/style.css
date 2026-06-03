@@ -1,0 +1,26 @@
+body {
+    background: #202028;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+#game-container {
+    display: flex;
+    gap: 20px;
+}
+
+canvas {
+    border: 2px solid #fff;
+    background: #000;
+}
+
+#ui {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

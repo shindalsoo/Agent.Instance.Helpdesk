@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>2048</h1>
+            <div class="score-container">
+                <div id="score">0</div>
+            </div>
+        </div>
+        <div id="grid-container" class="grid-container">
+            <!-- Tiles will be injected here -->
+        </div>
+        <div id="game-message" class="game-message">
+            <p></p>
+            <button id="restart-btn">다시 시작</button>
+        </div>
+    </div>
+    <script src="js/engine.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

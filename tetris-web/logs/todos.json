@@ -1,0 +1,68 @@
+{
+  "코딩 기획자": [
+    {
+      "content": "Develop a web-based Tetris game using HTML, CSS, and JavaScript. The project should follow the full pipeline: Requirement Analysis & Planning (by Coding Planner), Implementation (by Coding Developer),",
+      "status": "completed"
+    },
+    {
+      "content": "Analyze requirements and create development plan",
+      "status": "completed"
+    },
+    {
+      "content": "Implement core game engine (Grid, Shapes, Movement)",
+      "status": "completed"
+    },
+    {
+      "content": "Implement rotation logic and collision detection",
+      "status": "completed"
+    },
+    {
+      "content": "Implement line clearing and scoring system",
+      "status": "completed"
+    },
+    {
+      "content": "Develop UI/UX and responsive web interface",
+      "status": "completed"
+    },
+    {
+      "content": "QA, Bug Fixing, and Final Optimization",
+      "status": "completed"
+    }
+  ],
+  "코딩 개발자": [
+    {
+      "content": "# 작업계획서: Web-based Tetris Game 개발\n\n## 1. 프로젝트 개요\n본 프로젝트는 HTML5, CSS3, Vanilla JavaScript를 사용하여 웹 브라우저에서 실행 가능한 클래식 테트리스(Tetris) 게임을 개발하는 것을 목표로 합니다. 별도의 외부 라이브러리 없이 순수 자바스크립트만으로 구현하여 가볍고 빠른 성능을 보장하며, ",
+      "status": "completed"
+    },
+    {
+      "content": "Analyze requirements and create development plan",
+      "status": "completed"
+    },
+    {
+      "content": "Implement core game engine (Grid, Shapes, Movement)",
+      "status": "completed"
+    },
+    {
+      "content": "Implement rotation logic and collision detection",
+      "status": "completed"
+    },
+    {
+      "content": "Implement line clearing and scoring system",
+      "status": "completed"
+    },
+    {
+      "content": "Develop UI/UX and responsive web interface",
+      "status": "completed"
+    },
+    {
+      "content": "QA, Bug Fixing, and Final Optimization",
+      "status": "completed"
+    }
+  ],
+  "코딩 검수자": [
+    {
+      "content": "테트리스 게임 개발을 완료하였습니다.\n\n### 생성/수정한 파일 목록\n- `src/index.html`: 게임 메인 구조\n- `src/css/style.css`: 게임 스타일링\n- `src/js/constants.js`: 게임 상수(블록 모양, 색상 등) 정의\n- `src/js/utils.js`: 유틸리티 함수\n- `src/js/game.js`: 핵심 게임",
+      "status": "completed"
+    }
+  ]
+}
