@@ -1,7 +1,22 @@
-INFO:     Started server process [8950]
+INFO:     Started server process [184]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:50093 (Press CTRL+C to quit)
+INFO:     Uvicorn running on http://0.0.0.0:52541 (Press CTRL+C to quit)
 NEO4J_UTILS: [LOG] Executing Cypher query...
 NEO4J_UTILS: [LOG] Query executed successfully. Rows returned: 100
-INFO:     172.18.0.2:35230 - "GET / HTTP/1.1" 200 OK
+INFO:     172.18.0.2:56492 - "GET / HTTP/1.1" 200 OK
+NEO4J_UTILS: [LOG] Executing Cypher query...
+NEO4J_UTILS: [LOG] Query executed successfully. Rows returned: 100
+INFO:     172.18.0.2:50318 - "GET /?run_test=true HTTP/1.1" 200 OK
+NEO4J_UTILS: [LOG] Executing Cypher query...
+NEO4J_UTILS: [LOG] Query executed successfully. Rows returned: 100
+INFO:     172.18.0.2:33924 - "GET /?run_test=true HTTP/1.1" 200 OK
+NEO4J_UTILS: [LOG] Executing Cypher query...
+NEO4J_UTILS: [LOG] Query executed successfully. Rows returned: 100
+INFO:     172.18.0.2:33938 - "GET /?run_test=true HTTP/1.1" 200 OK
+NEO4J_UTILS: [LOG] Executing Cypher query...
+NEO4J_UTILS: [LOG] Query executed successfully. Rows returned: 100
+INFO:     172.18.0.2:33950 - "GET /?run_test=true HTTP/1.1" 200 OK
+NEO4J_UTILS: [LOG] Executing Cypher query...
+NEO4J_UTILS: [LOG] Query executed successfully. Rows returned: 100
+INFO:     172.18.0.2:58774 - "GET /?run_test=true HTTP/1.1" 200 OK

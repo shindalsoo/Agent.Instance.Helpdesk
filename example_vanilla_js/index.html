@@ -130,6 +130,26 @@
                 <span class="icon">🔗</span> 관계 탐색 (out)
             </div>
 
+            <!-- Custom RDB CRUD 섹션 추가 -->
+            <div style="margin-top: 20px; border-top: 1px solid #1e2130; padding-top: 20px;">
+                <h3 style="font-size: 11px; color: #555; margin-bottom: 12px;">Custom RDB CRUD</h3>
+                <div class="menu-item" onclick="runCustomExample('create_table', this)">
+                    <span class="icon">🏗️</span> 테이블 생성
+                </div>
+                <div class="menu-item" onclick="runCustomExample('insert', this)">
+                    <span class="icon">➕</span> 데이터 등록
+                </div>
+                <div class="menu-item" onclick="runCustomExample('update', this)">
+                    <span class="icon">✏️</span> 데이터 수정
+                </div>
+                <div class="menu-item" onclick="runCustomExample('fetch', this)">
+                    <span class="icon">🔍</span> 데이터 조회
+                </div>
+                <div class="menu-item" onclick="runCustomExample('delete', this)">
+                    <span class="icon">🗑️</span> 데이터 삭제
+                </div>
+            </div>
+
             <!-- 실행 중인 코드 미리보기 -->
             <div id="code-preview" class="code-preview">
 <span class="cmt">// 좌측 메뉴를 선택하세요</span></div>
@@ -224,6 +244,142 @@
                 document.getElementById('badge').style.display = 'inline';
                 document.getElementById('stats').style.display = 'flex';
                 document.getElementById('stat-time').textContent = elapsed;
+            } catch (e) {
+                document.getElementById('result-area').innerHTML =
+                    '<div class="status error">❌ ' + e.message + '</div>';
+            }
+        }
+
+        // ─────────────────────────────────────────────────────
+        // Custom RDB 예제 실행
+        // ─────────────────────────────────────────────────────
+        const customTableName = "test_vanilla";
+        let vanillaEntityId = null;
+
+        async function runCustomExample(action, el) {
+            // 메뉴 활성화
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            el.classList.add('active');
+
+            document.getElementById('badge').style.display = 'none';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('result-area').innerHTML =
+                '<div class="status"><div class="spinner"></div>데이터베이스 작업을 처리하고 있습니다...</div>';
+
+            const t0 = performance.now();
+            try {
+                let result = null;
+                let previewCode = "";
+                let title = "";
+
+                if (action === 'create_table') {
+                    title = "🏗️ 테이블 생성";
+                    previewCode = `<span class="kw">await</span> <span class="fn">Zio.Graph</span>
+  .<span class="fn">custom</span>(<span class="str">"${customTableName}"</span>)
+  .<span class="fn">createTable</span>([
+    { name: <span class="str">"id"</span>, type: <span class="str">"Integer"</span>, pk: <span class="kw">true</span> },
+    { name: <span class="str">"title"</span>, type: <span class="str">"String"</span>, nullable: <span class="kw">false</span> },
+    { name: <span class="str">"content"</span>, type: <span class="str">"Text"</span> }
+  ], <span class="str">"바닐라테스트"</span>, <span class="str">"웹 UI 테스트용"</span>);`;
+
+                    result = await Zio.Graph.custom(customTableName).createTable([
+                        { name: "id", type: "Integer", pk: true },
+                        { name: "title", type: "String", nullable: false },
+                        { name: "content", type: "Text" }
+                    ], "바닐라테스트", "웹 UI 테스트용");
+                    
+                    // 테이블 생성 후, ID 획득 시도
+                    const resp = await fetch("/api/custom/entities");
+                    if (resp.ok) {
+                        const entities = await resp.json();
+                        const target = entities.find(e => e.entity_name === customTableName);
+                        if (target) vanillaEntityId = target.id;
+                    }
+                    
+                    document.getElementById('result-area').innerHTML = 
+                        `<div class="status" style="color:#a0cfff;">✅ 테이블 <code>usr."${customTableName}"</code>이 정상적으로 생성되었습니다! <br>(Entity ID: ${vanillaEntityId || '알수없음'})</div>`;
+
+                } else if (action === 'insert') {
+                    title = "➕ 데이터 등록";
+                    previewCode = `<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">Zio.Graph</span>
+  .<span class="fn">custom</span>(<span class="str">"${customTableName}"</span>)
+  .<span class="fn">create</span>({ title: <span class="str">"바닐라테스트1"</span>, content: <span class="str">"내용무"</span> });`;
+
+                    result = await Zio.Graph.custom(customTableName).create({
+                        title: "바닐라테스트1",
+                        content: "내용무"
+                    });
+                    Zio.renderTable('#result-area', result);
+
+                } else if (action === 'update') {
+                    title = "✏️ 데이터 수정";
+                    previewCode = `<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">Zio.Graph</span>
+  .<span class="fn">custom</span>(<span class="str">"${customTableName}"</span>)
+  .<span class="fn">where</span>({ title: <span class="str">"바닐라테스트1"</span> })
+  .<span class="fn">update</span>({ content: <span class="str">"내용이 수정되었습니다!"</span> });`;
+
+                    result = await Zio.Graph.custom(customTableName)
+                        .where({ title: "바닐라테스트1" })
+                        .update({ content: "내용이 수정되었습니다!" });
+                    Zio.renderTable('#result-area', result);
+
+                } else if (action === 'fetch') {
+                    title = "🔍 데이터 조회";
+                    previewCode = `<span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">Zio.Graph</span>
+  .<span class="fn">custom</span>(<span class="str">"${customTableName}"</span>)
+  .<span class="fn">fetch</span>();`;
+
+                    result = await Zio.Graph.custom(customTableName).fetch();
+                    Zio.renderTable('#result-area', result);
+
+                } else if (action === 'delete') {
+                    title = "🗑️ 데이터 삭제 (테이블 드롭)";
+                    previewCode = `<span class="cmt">// 1. 데이터를 지웁니다</span>
+<span class="kw">await</span> <span class="fn">Zio.Graph</span>.<span class="fn">custom</span>(<span class="str">"${customTableName}"</span>).<span class="fn">delete</span>();
+<span class="cmt">// 2. 테이블을 드롭합니다</span>
+<span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"/api/custom/entities/"</span> + entityId, { method: <span class="str">"DELETE"</span> });`;
+
+                    // 1. 데이터 삭제
+                    await Zio.Graph.custom(customTableName).delete();
+                    
+                    // 2. 테이블 드롭
+                    let detailMsg = "데이터가 일괄 삭제되었습니다.";
+                    if (vanillaEntityId) {
+                        const delResp = await fetch(`/api/custom/entities/${vanillaEntityId}`, { method: "DELETE" });
+                        if (delResp.ok) {
+                            detailMsg += " 또한, 메타데이터 및 테이블(usr)이 완전히 드롭되었습니다.";
+                            vanillaEntityId = null;
+                        }
+                    } else {
+                        // 만약 entity_id 백업이 없다면, API 리스트에서 다시 찾기
+                        const resp = await fetch("/api/custom/entities");
+                        if (resp.ok) {
+                            const entities = await resp.json();
+                            const target = entities.find(e => e.entity_name === customTableName);
+                            if (target) {
+                                const delResp = await fetch(`/api/custom/entities/${target.id}`, { method: "DELETE" });
+                                if (delResp.ok) {
+                                    detailMsg += " 또한, 메타데이터 및 테이블(usr)이 완전히 드롭되었습니다.";
+                                }
+                            }
+                        }
+                    }
+                    
+                    document.getElementById('result-area').innerHTML = 
+                        `<div class="status" style="color:#fca5a5;">🗑️ ${detailMsg}</div>`;
+                }
+
+                document.getElementById('content-title').textContent = title;
+                document.getElementById('code-preview').innerHTML = previewCode;
+
+                const elapsed = Math.round(performance.now() - t0);
+                if (result && result.data && result.data.length !== undefined) {
+                    document.getElementById('badge').textContent = result.data.length + '건';
+                    document.getElementById('badge').style.display = 'inline';
+                }
+                document.getElementById('stats').style.display = 'flex';
+                document.getElementById('stat-time').textContent = elapsed;
+
             } catch (e) {
                 document.getElementById('result-area').innerHTML =
                     '<div class="status error">❌ ' + e.message + '</div>';
