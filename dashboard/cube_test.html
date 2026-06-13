@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      background: #020713;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      perspective: 800px;
+    }
+    .scene {
+      width: 200px;
+      height: 200px;
+      transform-style: preserve-3d;
+      transform: rotateX(-30deg) rotateY(45deg);
+    }
+    .c-box {
+      --w: 120px;
+      --h: 80px;
+      --z: 60px;
+      width: var(--w);
+      height: var(--h);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .face {
+      position: absolute;
+      box-sizing: border-box;
+      border: 2px solid #00ffcc;
+      background: rgba(0, 255, 204, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    /* Corrected mathematical transforms */
+    .f-bottom {
+      width: var(--w);
+      height: var(--h);
+      top: 0;
+      left: 0;
+      transform: translateZ(0px);
+    }
+    .f-top {
+      width: var(--w);
+      height: var(--h);
+      top: 0;
+      left: 0;
+      transform: translateZ(var(--z));
+    }
+    .f-front {
+      width: var(--w);
+      height: var(--z);
+      top: var(--h);
+      left: 0;
+      transform: rotateX(90deg);
+      transform-origin: top center;
+    }
+    .f-back {
+      width: var(--w);
+      height: var(--z);
+      top: 0;
+      left: 0;
+      transform: rotateX(90deg);
+      transform-origin: top center;
+    }
+    .f-left {
+      width: var(--z);
+      height: var(--h);
+      top: 0;
+      left: 0;
+      transform: rotateY(-90deg); /* Changed from 90deg to -90deg */
+      transform-origin: top left;
+    }
+    .f-right {
+      width: var(--z);
+      height: var(--h);
+      top: 0;
+      left: var(--w);
+      transform: rotateY(-90deg); /* Changed from 90deg to -90deg */
+      transform-origin: top left;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="c-box">
+      <div class="face f-bottom">Bottom</div>
+      <div class="face f-top">Top</div>
+      <div class="face f-front">Front</div>
+      <div class="face f-back">Back</div>
+      <div class="face f-left">Left</div>
+      <div class="face f-right">Right</div>
+    </div>
+  </div>
+</body>
+</html>

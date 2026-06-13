@@ -1,11 +1,8 @@
-INFO:     Started server process [90355]
+INFO:     Started server process [45837]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:55341 (Press CTRL+C to quit)
-INFO:     172.18.0.2:45782 - "GET /index.html HTTP/1.1" 200 OK
-INFO:     172.18.0.2:57572 - "GET /api/reports HTTP/1.1" 200 OK
-INFO:     172.18.0.2:57574 - "POST /api/query HTTP/1.1" 200 OK
-INFO:     172.18.0.2:57576 - "POST /api/query HTTP/1.1" 200 OK
-INFO:     172.18.0.2:57588 - "POST /api/query HTTP/1.1" 200 OK
-INFO:     172.18.0.2:57602 - "POST /api/query HTTP/1.1" 500 Internal Server Error
-INFO:     172.18.0.2:57612 - "POST /api/query HTTP/1.1" 200 OK
+INFO:     Uvicorn running on http://0.0.0.0:43791 (Press CTRL+C to quit)
+INFO:     172.18.0.2:51570 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:51572 - "GET /api/reports HTTP/1.1" 200 OK
+INFO:     172.18.0.2:51582 - "POST /api/query HTTP/1.1" 200 OK
+INFO:     172.18.0.2:51588 - "POST /api/query HTTP/1.1" 200 OK

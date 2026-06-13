@@ -1,0 +1,119 @@
+INFO:     Started server process [60870]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:45353 (Press CTRL+C to quit)
+INFO:     172.18.0.2:57026 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:57032 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:57042 - "GET /assets/agent_ledger_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:57046 - "GET /assets/agent_inventory_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:57050 - "GET /assets/agent_dispatch_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:39794 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:60784 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:43994 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:43004 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:43010 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:40216 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:60216 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:60224 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:60240 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:60256 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:42562 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:53386 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:38286 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54274 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54288 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54296 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:59290 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:59304 - "GET /assets/agent_inventory_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:59302 - "GET /assets/agent_ledger_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:59316 - "GET /assets/agent_dispatch_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:41252 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:32952 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:32978 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:32962 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:53442 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:55400 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:55406 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:55408 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:43866 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:58742 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:38696 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:38706 - "GET /assets/agent_inventory_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:38712 - "GET /assets/agent_ledger_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:38724 - "GET /assets/agent_dispatch_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35584 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:43232 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:56370 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:45600 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:45606 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:48246 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:38536 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:44490 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:36642 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:36650 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:36660 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:42672 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:45146 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:45150 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:45156 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:49796 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:49802 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:49812 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:49828 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35596 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35610 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35626 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:43284 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:53560 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:40770 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:45252 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:53400 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:51706 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:51720 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:51736 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:43250 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:43254 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:50012 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:50258 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:37880 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:48456 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:45004 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:45014 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:45016 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:36178 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:36190 - "GET /assets/agent_inventory_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:39670 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:39674 - "GET /assets/agent_inventory_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:60612 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:60628 - "GET /assets/agent_dispatch_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:60630 - "GET /assets/agent_ledger_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35970 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35980 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35986 - "GET /agent_detail.html?agent=dispatch HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35502 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35518 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35526 - "GET /assets/agent_inventory_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:35538 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:58494 - "GET /agent_detail.html?agent=dispatch HTTP/1.1" 200 OK
+INFO:     172.18.0.2:33454 - "GET /agent_detail.html?agent=dispatch HTTP/1.1" 200 OK
+INFO:     172.18.0.2:56946 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:56640 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:58120 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:58130 - "GET /agent_detail.html?agent=prediction HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54744 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:41768 - "GET /agent_detail.html?agent=dispatch HTTP/1.1" 200 OK
+INFO:     172.18.0.2:41780 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 304 Not Modified
+INFO:     172.18.0.2:48746 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:59328 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:34718 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54126 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54138 - "GET /assets/agent_ledger_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54140 - "GET /assets/agent_inventory_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54152 - "GET /assets/agent_dispatch_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54142 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54156 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:47522 - "GET /agent_detail.html?agent=preorder HTTP/1.1" 200 OK
+INFO:     172.18.0.2:41704 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:49524 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:51524 - "GET /agent_detail.html?agent=ledger HTTP/1.1" 200 OK
+INFO:     172.18.0.2:59926 - "GET /index.html HTTP/1.1" 200 OK

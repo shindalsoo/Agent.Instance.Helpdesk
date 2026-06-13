@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>광진물산 OCEAN-NET 자율 수산 유통 무경계 3D 관제 맵</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- OrbitControls CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root {
+      --bg-workspace: #020713;
+      --neon-cyan: #00e5ff;
+      --neon-blue: #0088ff;
+      --neon-green: #00ffcc;
+      --neon-pink: #ff007f;
+      --neon-orange: #ffb700;
+      --neon-purple: #9d4edd;
+      --text-light: #e0f2fe;
+      --text-muted: #38bdf8;
+      --glass-panel: rgba(4, 18, 38, 0.85);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      color: var(--text-light);
+      font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      user-select: none;
+      background: #020713;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('assets/seafood_logistics_bg.png') no-repeat center center / cover;
+      filter: blur(6px) brightness(0.48);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* 은은한 심해 기포 효과 캔버스 */
+    #oceanCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .logistics-map-viewport {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* 3D 캔버스 영역 */
+    #threejs-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: transparent;
+      outline: none;
+      overflow: hidden;
+      z-index: 3;
+    }
+
+    .header-panel {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #fff;
+      text-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+      margin: 0;
+    }
+
+    .header-title span {
+      color: var(--neon-cyan);
+    }
+
+    .header-status {
+      font-size: 9px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: monospace;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--neon-green);
+      animation: blink-dot 1.2s infinite alternate;
+    }
+
+    @keyframes blink-dot {
+      0% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+
+    /* AI 에이전트 슬라이드 탭 Roster (우측 부착형) */
+    .agent-card {
+      position: absolute;
+      right: -205px; /* 아바타 원만 여백과 함께 노출, 글자는 숨김 */
+      width: 270px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(10, 25, 47, 0.65);
+      border: none; /* 테두리 제거 */
+      border-radius: 12px 0 0 12px; /* 좌측 모서리만 라운드 적용 */
+      padding: 8px 12px;
+      box-sizing: border-box;
+      transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background 0.3s, box-shadow 0.3s;
+      z-index: 1002; /* z-index 상향 조정으로 마우스 이벤트 보장 */
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      pointer-events: auto; /* 마우스 이벤트 보장 */
+    }
+
+    /* 각 에이전트 카드의 세로 높이 배치 */
+    .agent-card.preorder-card { top: 100px; }
+    .agent-card.inventory-card { top: 170px; }
+    .agent-card.prediction-card { top: 240px; }
+    .agent-card.ledger-card { top: 310px; }
+    .agent-card.dispatch-card { top: 380px; }
+
+    .agent-card.hovered {
+      right: 0px; /* 마우스 호버 시 왼쪽으로 전체 내용이 부드럽게 튀어나옴 */
+      background: rgba(10, 25, 47, 0.88);
+    }
+
+    /* 에이전트별 호버 네온 섀도우 테마 (테두리 제거 대안으로 입체감 보정) */
+    .agent-card.purple-theme.hovered { box-shadow: -8px 8px 25px rgba(157, 78, 221, 0.3); }
+    .agent-card.cyan-theme.hovered { box-shadow: -8px 8px 25px rgba(0, 229, 255, 0.3); }
+    .agent-card.orange-theme.hovered { box-shadow: -8px 8px 25px rgba(255, 183, 0, 0.3); }
+    .agent-card.pink-theme.hovered { box-shadow: -8px 8px 25px rgba(255, 0, 127, 0.3); }
+    .agent-card.green-theme.hovered { box-shadow: -8px 8px 25px rgba(0, 255, 204, 0.3); }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+
+    .agent-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    /* 에이전트별 호버 아바타 네온 링 */
+    .agent-card.purple-theme.hovered .agent-avatar { border-color: var(--neon-purple); box-shadow: 0 0 10px rgba(157, 78, 221, 0.6); }
+    .agent-card.cyan-theme.hovered .agent-avatar { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 229, 255, 0.6); }
+    .agent-card.orange-theme.hovered .agent-avatar { border-color: var(--neon-orange); box-shadow: 0 0 10px rgba(255, 183, 0, 0.6); }
+    .agent-card.pink-theme.hovered .agent-avatar { border-color: var(--neon-pink); box-shadow: 0 0 10px rgba(255, 0, 127, 0.6); }
+    .agent-card.green-theme.hovered .agent-avatar { border-color: var(--neon-green); box-shadow: 0 0 10px rgba(0, 255, 204, 0.6); }
+
+    .pulse-dot {
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      border: 1.5px solid #020713;
+    }
+
+    .purple-theme .pulse-dot { background: var(--neon-purple); box-shadow: 0 0 4px var(--neon-purple); }
+    .cyan-theme .pulse-dot { background: var(--neon-cyan); box-shadow: 0 0 4px var(--neon-cyan); }
+    .orange-theme .pulse-dot { background: var(--neon-orange); box-shadow: 0 0 4px var(--neon-orange); }
+    .pink-theme .pulse-dot { background: var(--neon-pink); box-shadow: 0 0 4px var(--neon-pink); }
+    .green-theme .pulse-dot { background: var(--neon-green); box-shadow: 0 0 4px var(--neon-green); }
+
+    .agent-info {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .agent-name-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+
+    .agent-role {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .agent-status-lbl {
+      font-family: monospace;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .purple-theme .agent-status-lbl { color: var(--neon-purple); }
+    .cyan-theme .agent-status-lbl { color: var(--neon-cyan); }
+    .orange-theme .agent-status-lbl { color: var(--neon-orange); }
+    .pink-theme .agent-status-lbl { color: var(--neon-pink); }
+    .green-theme .agent-status-lbl { color: var(--neon-green); }
+
+    .agent-log {
+      font-size: 9px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .agent-card.hovered .agent-log {
+      color: #fff;
+    }
+
+    /* 플로팅 컨트롤 툴박스 */
+    .glass-toolbox {
+      position: absolute;
+      bottom: 25px;
+      left: 25px;
+      background: var(--glass-panel);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 10px;
+      padding: 6px 12px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .toolbox-btn {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      color: var(--neon-cyan);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .toolbox-btn:hover {
+      background: var(--neon-cyan);
+      color: #020916;
+      box-shadow: 0 0 12px var(--neon-cyan);
+    }
+
+    .toolbox-btn.active {
+      background: var(--neon-cyan);
+      color: #020916;
+      box-shadow: 0 0 12px var(--neon-cyan);
+    }
+
+    /* 상단 중앙 반투명 상황판 (Glassmorphism - Visual Telemetry Attached) */
+    .center-dashboard-panel {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(2, 7, 19, 0.35); /* 더 투명하게 설정 */
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: none; /* 테두리선 제거 */
+      border-radius: 0 0 20px 20px; /* 상단 고정, 하단만 둥글게 */
+      padding: 16px 32px 18px 32px; /* 세로 크기를 크게 확보 (3배) */
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 100;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), 
+                  inset 0 1px 1px rgba(255, 255, 255, 0.05); /* 상단 하이라이트 효과만 가볍게 부여 */
+      animation: slide-down 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+      pointer-events: auto;
+      width: 720px; /* 3개 열 수용을 위해 확장 */
+    }
+
+    @keyframes slide-down {
+      0% {
+        transform: translate(-50%, -50px);
+        opacity: 0;
+      }
+      100% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+
+    .dashboard-summary-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .dashboard-horizontal-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, rgba(0, 229, 255, 0), rgba(0, 229, 255, 0.18), rgba(0, 229, 255, 0));
+    }
+
+    /* 1:2:1 텔레메트리 가로 배치 */
+    .dashboard-telemetry-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1px 2.2fr 1px 1.2fr;
+      gap: 15px;
+      width: 100%;
+    }
+
+    .telemetry-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    /* 카운터 1칸 스타일 */
+    .counter-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      background: rgba(10, 25, 47, 0.35);
+      border-radius: 6px;
+      padding: 6px 12px;
+      height: 48px;
+      box-sizing: border-box;
+    }
+
+    .counter-label {
+      font-size: 8px;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    .counter-value {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+    }
+    
+    .counter-value.neon-orange {
+      color: var(--neon-orange);
+      text-shadow: 0 0 8px rgba(255, 183, 0, 0.4);
+    }
+    
+    .counter-value.neon-cyan {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+    }
+
+    .telemetry-divider {
+      width: 1px;
+      height: 100%;
+      background: rgba(0, 229, 255, 0.1);
+    }
+
+    .telemetry-title {
+      font-size: 8px;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 1.0px;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .telemetry-viz {
+      background: rgba(10, 25, 47, 0.35);
+      border-radius: 6px;
+      padding: 6px 12px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* 실시간 꺾은선 SVG 스타일 */
+    .hud-sine-wave {
+      width: 100%;
+      height: 100%;
+    }
+
+    .wave-path {
+      fill: none;
+      stroke-width: 1.0px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .line-chart-1 {
+      stroke: var(--neon-cyan);
+      filter: drop-shadow(0 0 2px var(--neon-cyan));
+    }
+
+    .line-chart-2 {
+      stroke: var(--neon-pink);
+      filter: drop-shadow(0 0 2px var(--neon-pink));
+    }
+
+    .chart-node {
+      fill: #ffffff;
+    }
+    .node-c1 {
+      fill: var(--neon-cyan);
+    }
+    .node-c2 {
+      fill: var(--neon-pink);
+    }
+
+    .dashboard-stat-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 105px;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 1.2px;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 19px;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-unit {
+      font-size: 9px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-left: 2px;
+    }
+
+    .stat-status {
+      font-size: 8px;
+      font-weight: 700;
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .dashboard-divider {
+      width: 1px;
+      height: 35px;
+      background: linear-gradient(to bottom, rgba(0, 229, 255, 0), rgba(0, 229, 255, 0.3), rgba(0, 229, 255, 0));
+    }
+
+    /* 네온 상태 색상 */
+    .text-cyan {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+    }
+    .text-pink {
+      color: var(--neon-pink);
+      text-shadow: 0 0 5px rgba(255, 0, 127, 0.5);
+    }
+    .text-green {
+      color: var(--neon-green);
+      text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+    }
+    .text-orange {
+      color: var(--neon-orange);
+      text-shadow: 0 0 5px rgba(255, 183, 0, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 은은한 심해 기포 효과 캔버스 -->
+  <canvas id="oceanCanvas"></canvas>
+
+  <!-- 풀스크린 3D 가상 뷰포트 -->
+  <div class="logistics-map-viewport" id="viewport">
+    
+    <!-- 헤더 패널 -->
+    <div class="header-panel">
+      <h1 class="header-title">광진물산 <span>OCEAN-NET</span></h1>
+      <div class="header-status">
+        <div class="live-dot"></div>
+        <span>SYSTEM STATUS: WEBGL 3D ACTIVE</span>
+      </div>
+    </div>
+
+    <!-- 상단 중앙 실시간 관제 상황판 (Glassmorphic Dashboard - Visual Telemetry) -->
+    <div class="center-dashboard-panel">
+      <!-- 1단: 요약 관제 카드 -->
+      <div class="dashboard-summary-row">
+        <div class="dashboard-stat-card">
+          <span class="stat-label">조업선 연동</span>
+          <span class="stat-value" id="vessel-count">4 <span class="stat-unit">UNITS</span></span>
+          <span class="stat-status text-cyan">● ACTIVE</span>
+        </div>
+        <div class="dashboard-divider"></div>
+        <div class="dashboard-stat-card">
+          <span class="stat-label">자율수송 트럭</span>
+          <span class="stat-value" id="truck-count">5 <span class="stat-unit">UNITS</span></span>
+          <span class="stat-status text-pink">● RUNNING</span>
+        </div>
+        <div class="dashboard-divider"></div>
+        <div class="dashboard-stat-card">
+          <span class="stat-label">누적 유통 물량</span>
+          <span class="stat-value" id="total-logistics">42.8 <span class="stat-unit">TONS</span></span>
+          <span class="stat-status text-green">▲ 12.4%</span>
+        </div>
+        <div class="dashboard-divider"></div>
+        <div class="dashboard-stat-card">
+          <span class="stat-label">보관창고 가동률</span>
+          <span class="stat-value" id="warehouse-util">78.5 <span class="stat-unit">%</span></span>
+          <span class="stat-status text-orange">● NORMAL</span>
+        </div>
+      </div>
+
+      <!-- 구분선 -->
+      <div class="dashboard-horizontal-divider"></div>
+
+      <!-- 2단: 시각적 텔레메트리 (카운터 | 넓은 꺾은선 SVG | 카운터) -->
+      <div class="dashboard-telemetry-row">
+        <!-- 1칸: 좌측 배송 카운터 -->
+        <div class="telemetry-box">
+          <div class="counter-box">
+            <span class="counter-label">🚚 DELIVERY CASES</span>
+            <span class="counter-value neon-cyan" id="cases-count">148</span>
+          </div>
+        </div>
+
+        <div class="telemetry-divider"></div>
+
+        <!-- 2칸 합쳐서: 중앙 꺾은선 그래프 (트래픽 모니터) -->
+        <div class="telemetry-box">
+          <span class="telemetry-title">⚡ REALTIME FLOW TREND</span>
+          <div class="telemetry-viz">
+            <svg class="hud-sine-wave" viewBox="0 0 280 40">
+              <!-- 배경 격자 보조선 -->
+              <line x1="0" y1="10" x2="280" y2="10" stroke="rgba(0, 229, 255, 0.08)" stroke-width="0.5" />
+              <line x1="0" y1="20" x2="280" y2="20" stroke="rgba(0, 229, 255, 0.08)" stroke-width="0.5" />
+              <line x1="0" y1="30" x2="280" y2="30" stroke="rgba(0, 229, 255, 0.08)" stroke-width="0.5" />
+              
+              <!-- 꺾은선 차트 선들 -->
+              <path class="wave-path line-chart-1" id="lineChart1" d="" />
+              <path class="wave-path line-chart-2" id="lineChart2" d="" />
+              <g id="lineNodes1"></g>
+              <g id="lineNodes2"></g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="telemetry-divider"></div>
+
+        <!-- 1칸: 우측 온도 카운터 -->
+        <div class="telemetry-box">
+          <div class="counter-box">
+            <span class="counter-label">❄️ COLD-CHAIN TEMP</span>
+            <span class="counter-value neon-orange" id="temp-count">-18.5 °C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 우측 상단 AI 에이전트 슬라이드 탭 Roster -->
+    <!-- 1. 선제발주 에이전트 -->
+    <div class="agent-card purple-theme preorder-card" onclick="goToAgentDetail('preorder')">
+      <div class="avatar-wrapper">
+        <img src="assets/agent_prediction_thumbnail.png" class="agent-avatar" alt="선제발주" />
+        <div class="pulse-dot"></div>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name-row">
+          <span class="agent-role">선제발주 에이전트</span>
+          <span class="agent-status-lbl">ACTIVE</span>
+        </div>
+        <div class="agent-log" id="log-preorder">과거 발주 패턴 분석 및 예측 제안 대기 중...</div>
+      </div>
+    </div>
+
+    <!-- 2. 재고관제 에이전트 -->
+    <div class="agent-card cyan-theme inventory-card" onclick="goToAgentDetail('inventory')">
+      <div class="avatar-wrapper">
+        <img src="assets/agent_inventory_thumbnail.png" class="agent-avatar" alt="재고관제" />
+        <div class="pulse-dot"></div>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name-row">
+          <span class="agent-role">재고관제 에이전트</span>
+          <span class="agent-status-lbl">ACTIVE</span>
+        </div>
+        <div class="agent-log" id="log-inventory">보관창고 상태 실시간 관제 중...</div>
+      </div>
+    </div>
+
+    <!-- 3. 예측제안 에이전트 -->
+    <div class="agent-card orange-theme prediction-card" onclick="goToAgentDetail('prediction')">
+      <div class="avatar-wrapper">
+        <img src="assets/agent_prediction_thumbnail.png" class="agent-avatar" alt="예측제안" />
+        <div class="pulse-dot"></div>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name-row">
+          <span class="agent-role">예측제안 에이전트</span>
+          <span class="agent-status-lbl">ACTIVE</span>
+        </div>
+        <div class="agent-log" id="log-prediction">주간 수급 및 가격 트렌드 실시간 분석 중...</div>
+      </div>
+    </div>
+
+    <!-- 4. 재고원장 에이전트 -->
+    <div class="agent-card pink-theme ledger-card" onclick="goToAgentDetail('ledger')">
+      <div class="avatar-wrapper">
+        <img src="assets/agent_ledger_thumbnail.png" class="agent-avatar" alt="재고원장" />
+        <div class="pulse-dot"></div>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name-row">
+          <span class="agent-role">재고원장 에이전트</span>
+          <span class="agent-status-lbl">SYNCED</span>
+        </div>
+        <div class="agent-log" id="log-ledger">블록체인 분산 원장 트랜잭션 동기화 완료</div>
+      </div>
+    </div>
+
+    <!-- 5. 자율배차 에이전트 -->
+    <div class="agent-card green-theme dispatch-card" onclick="goToAgentDetail('dispatch')">
+      <div class="avatar-wrapper">
+        <img src="assets/agent_dispatch_thumbnail.png" class="agent-avatar" alt="자율배차" />
+        <div class="pulse-dot"></div>
+      </div>
+      <div class="agent-info">
+        <div class="agent-name-row">
+          <span class="agent-role">자율배차 에이전트</span>
+          <span class="agent-status-lbl">OPTIMIZING</span>
+        </div>
+        <div class="agent-log" id="log-dispatch">차량 배차 및 이송 경로 실시간 최적화 중...</div>
+      </div>
+    </div>
+
+    <!-- 3D WebGL Canvas 컨테이너 -->
+    <div id="threejs-container"></div>
+
+    <!-- 카메라 컨트롤러 툴박스 -->
+    <div class="glass-toolbox">
+      <button class="toolbox-btn" id="btnToggle2D" onclick="toggle2D3D()" data-tooltip="2D/3D 보기 토글">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 17 22 12"></polyline></svg>
+      </button>
+      <button class="toolbox-btn" id="btnCenter" onclick="centerFocus()" data-tooltip="맵 정중앙 리셋">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>
+      </button>
+      <button class="toolbox-btn active" id="btnOrbit" onclick="toggleOrbit()" data-tooltip="자동 카메라 회전">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+      </button>
+      <button class="toolbox-btn" id="btnZoomIn" onclick="zoomIn()" data-tooltip="확대">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+      <button class="toolbox-btn" id="btnZoomOut" onclick="zoomOut()" data-tooltip="축소">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // ----------------------------------------------------
+    // [1] 시뮬레이션 시나리오 정의
+    // ----------------------------------------------------
+    const scenarios = [
+      {
+        id: 1,
+        agentId: "ind_vessel",
+        activeNodes: ["node_vessel_1", "node_hq"],
+        pathId: "line_v1_hq",
+        accent: "#00e5ff",
+      },
+      {
+        id: 2,
+        agentId: "ind_pricing",
+        activeNodes: ["node_hq", "node_buyer_2"],
+        pathId: "line_v2_hq",
+        accent: "#ffb700",
+      },
+      {
+        id: 3,
+        agentId: "ind_warehouse",
+        activeNodes: ["node_hq", "node_warehouse_1"],
+        pathId: "line_hq_wh1",
+        accent: "#9d4edd",
+      },
+      {
+        id: 4,
+        agentId: "ind_logistics",
+        activeNodes: ["node_warehouse_1", "node_buyer_1"],
+        pathId: "line_wh1_buyer1",
+        accent: "#ff007f",
+      },
+      {
+        id: 5,
+        agentId: "ind_vessel_3",
+        activeNodes: ["node_vessel_3", "node_hq"],
+        pathId: "line_v3_hq",
+        accent: "#00ffcc",
+      },
+      {
+        id: 6,
+        agentId: "ind_vessel_4",
+        activeNodes: ["node_vessel_4", "node_hq"],
+        pathId: "line_v4_hq",
+        accent: "#d8b4fe",
+      },
+      {
+        id: 7,
+        agentId: "ind_buyer_3",
+        activeNodes: ["node_warehouse_1", "node_buyer_3"],
+        pathId: "line_wh1_buyer3",
+        accent: "#ff007f",
+      }
+    ];
+
+    // ----------------------------------------------------
+    // [2] 심해 기포 효과 (배경용 2D 캔버스)
+    // ----------------------------------------------------
+    const canvas2d = document.getElementById('oceanCanvas');
+    const ctx2d = canvas2d.getContext('2d');
+    let cw = canvas2d.width = window.innerWidth;
+    let ch = canvas2d.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      cw = canvas2d.width = window.innerWidth;
+      ch = canvas2d.height = window.innerHeight;
+    });
+
+    const bubbles = [];
+    for (let i = 0; i < 35; i++) {
+      bubbles.push({
+        x: Math.random() * cw,
+        y: ch + Math.random() * 100,
+        size: 0.5 + Math.random() * 2.5,
+        speed: 0.2 + Math.random() * 0.7,
+        angle: Math.random() * Math.PI * 2,
+        wobble: 0.02 + Math.random() * 0.03
+      });
+    }
+
+    function animateBubbles() {
+      ctx2d.fillStyle = 'rgba(2, 7, 19, 0.15)';
+      ctx2d.fillRect(0, 0, cw, ch);
+      bubbles.forEach(b => {
+        b.y -= b.speed;
+        b.angle += b.wobble;
+        let drawX = b.x + Math.sin(b.angle) * 2;
+        if (b.y < -50) {
+          b.y = ch + 50;
+          b.x = Math.random() * cw;
+        }
+        ctx2d.beginPath();
+        ctx2d.arc(drawX, b.y, b.size, 0, Math.PI * 2);
+        ctx2d.fillStyle = 'rgba(0, 229, 255, 0.1)';
+        ctx2d.fill();
+      });
+      requestAnimationFrame(animateBubbles);
+    }
+    animateBubbles();
+
+    // ----------------------------------------------------
+    // [3] Three.js 기반 3D 웹앱 엔진 구현
+    // ----------------------------------------------------
+    const container = document.getElementById('threejs-container');
+    const clock = new THREE.Clock();
+
+    // 1. Scene / Camera / Renderer 초기화
+    const scene = new THREE.Scene();
+    // 안개 효과 제거 (원거리에서 선들이 흐릿해지며 소멸하는 현상 방지)
+    // scene.fog = new THREE.FogExp2(0x020713, 0.0008);
+
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 10, 3000);
+    // Z-up 좌표계 설정
+    camera.up.set(0, 0, 1);
+
+    // 기본 카메라 타겟 및 목적지 설정 (1단계 더 눕혀지고 추가 축소된 3D 시점)
+    let targetCamPos = new THREE.Vector3(500, -320, 540);
+    let targetLookAt = new THREE.Vector3(500, 375, 0);
+    camera.position.copy(targetCamPos);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // 2. Controls 연동
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05; // 지면 아래로 내려가지 않게 설정
+    controls.minDistance = 200;
+    controls.maxDistance = 1200;
+    controls.target.copy(targetLookAt);
+    controls.autoRotateSpeed = 0.4; // 천천히 회전하도록 속도 조정 (기본값 2.0)
+    controls.autoRotate = true; // F5 최초 로딩 시 자동 회전 활성화
+
+    // 사용자가 직접 마우스 드래그 조작을 시작하면 카메라 보간 비행을 중단하여 화면 튕김을 막음
+    controls.addEventListener('start', () => {
+      isTransitioning = false;
+      targetCamPos.copy(camera.position);
+      targetLookAt.copy(controls.target);
+    });
+
+    // 3. 조명(Lighting) 시스템 구축
+    const ambientLight = new THREE.AmbientLight(0x0a192f, 1.5);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0x00e5ff, 1.0);
+    dirLight.position.set(300, 150, 650);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    dirLight.shadow.camera.near = 10;
+    dirLight.shadow.camera.far = 1200;
+    const d = 500;
+    dirLight.shadow.camera.left = -d;
+    dirLight.shadow.camera.right = d;
+    dirLight.shadow.camera.top = d;
+    dirLight.shadow.camera.bottom = -d;
+    scene.add(dirLight);
+
+    // 본사 건물 아래에 네온 포인터 조명 추가
+    const pointLight = new THREE.PointLight(0x00ffcc, 0.8, 350, 0.8);
+    pointLight.position.set(400, 360, 20);
+    scene.add(pointLight);
+
+    // 4. 로우폴리 물결 바다 평면 생성 (투명도를 높여 뒷배경이 비치게 함)
+    const seaGeom = new THREE.PlaneGeometry(1600, 1200, 48, 36);
+    const seaMat = new THREE.MeshStandardMaterial({
+      color: 0x020a1c,
+      roughness: 0.8,
+      metalness: 0.1,
+      flatShading: true,
+      transparent: true,
+      opacity: 0.12
+    });
+    const sea = new THREE.Mesh(seaGeom, seaMat);
+    sea.position.set(500, 375, -20); // 바다 기준 높이를 Z=-20으로 크게 낮춰 도로망 침범 차단
+    sea.receiveShadow = true;
+    scene.add(sea);
+
+    // 5. 바닥 라벨 텍스처 데칼 생성 유틸리티
+    function createLabelDecal(text, subText, colorHex, x, y) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 타이틀
+      ctx.font = 'bold 24px Noto Sans KR, Outfit, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = colorHex;
+      ctx.shadowBlur = 10;
+      ctx.fillText(text, 128, 55);
+      
+      // 서브 텍스트
+      ctx.font = '15px monospace';
+      ctx.fillStyle = colorHex;
+      ctx.shadowBlur = 6;
+      ctx.fillText(subText, 128, 95);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const decalGeom = new THREE.PlaneGeometry(80, 40);
+      const decalMat = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+      const decalMesh = new THREE.Mesh(decalGeom, decalMat);
+      decalMesh.position.set(x, y - 42, 0.5); // 노드 바닥 살짝 아래 정렬
+      scene.add(decalMesh);
+      return decalMesh;
+    }
+
+    // 물흐르는 점선용 캔버스 텍스처 생성 유틸리티
+    function createDashedTexture(colorHex) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 16;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 네온 빛을 극대화하기 위해 그림자 효과 적용
+      ctx.shadowColor = colorHex;
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = colorHex;
+      // 절반은 채우고 절반은 비워 점선(Dash) 패턴 구현
+      ctx.fillRect(0, 0, 32, 16);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      return texture;
+    }
+
+    // 6. 3D 모델 생성기
+    // (A) 원양어선 및 연안어선 3D 조립
+    function buildVessel(isVessel1) {
+      const vessel = new THREE.Group();
+      const depth = isVessel1 ? 12 : 10;
+      const width = isVessel1 ? 32 : 26;
+      const height = isVessel1 ? 18 : 16;
+      const baseColor = isVessel1 ? 0x00e5ff : 0x38bdf8;
+
+      // 선체 바디 (Box)
+      const bodyGeom = new THREE.BoxGeometry(width, height, depth);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: baseColor,
+        emissive: baseColor,
+        emissiveIntensity: 0.45,
+        roughness: 0.2,
+        metalness: 0.8,
+        flatShading: true
+      });
+      const body = new THREE.Mesh(bodyGeom, bodyMat);
+      body.position.set(0, 0, depth / 2);
+      body.castShadow = true;
+      vessel.add(body);
+
+      // 쐐기형 선수 (BufferGeometry)
+      const startX = width / 2;
+      const tipX = startX + (isVessel1 ? 16 : 13);
+      const halfY = height / 2;
+      
+      const bowVertices = new Float32Array([
+        // 바닥 삼각형
+        startX, -halfY, 0,       tipX, 0, 0,              startX, halfY, 0,
+        // 상판 삼각형
+        startX, -halfY, depth,   startX, halfY, depth,    tipX, 0, depth,
+        // 좌현 벽
+        startX, -halfY, 0,       startX, -halfY, depth,   tipX, 0, depth,
+        startX, -halfY, 0,       tipX, 0, depth,          tipX, 0, 0,
+        // 우현 벽
+        startX, halfY, 0,        tipX, 0, 0,              tipX, 0, depth,
+        startX, halfY, 0,        tipX, 0, depth,          startX, halfY, depth
+      ]);
+      
+      const bowGeom = new THREE.BufferGeometry();
+      bowGeom.setAttribute('position', new THREE.BufferAttribute(bowVertices, 3));
+      bowGeom.computeVertexNormals();
+
+      const bowMesh = new THREE.Mesh(bowGeom, bodyMat);
+      bowMesh.castShadow = true;
+      vessel.add(bowMesh);
+
+      // 조타실 (선실)
+      const cabinW = isVessel1 ? 11 : 9;
+      const cabinH = isVessel1 ? 13 : 11;
+      const cabinD = isVessel1 ? 10 : 8;
+      const cabinGeom = new THREE.BoxGeometry(cabinW, cabinH, cabinD);
+      const cabinMat = new THREE.MeshStandardMaterial({
+        color: 0xffb700,
+        emissive: 0xffb700,
+        emissiveIntensity: 0.05,
+        roughness: 0.5,
+        metalness: 0.3
+      });
+      const cabin = new THREE.Mesh(cabinGeom, cabinMat);
+      cabin.position.set(-width / 2 + cabinW / 2 + 3, 0, depth + cabinD / 2);
+      cabin.castShadow = true;
+      vessel.add(cabin);
+
+      // 둥실대는 레이더 안테나 대
+      const radarGroup = new THREE.Group();
+      const poleGeom = new THREE.CylinderGeometry(0.8, 0.8, 7, 8);
+      poleGeom.rotateX(Math.PI / 2);
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9 });
+      const pole = new THREE.Mesh(poleGeom, poleMat);
+      pole.position.set(0, 0, 3.5);
+      radarGroup.add(pole);
+
+      // 레이더 날개
+      const barGeom = new THREE.BoxGeometry(8, 1.5, 1);
+      const barMat = new THREE.MeshStandardMaterial({ color: 0xff3333, roughness: 0.5 });
+      const bar = new THREE.Mesh(barGeom, barMat);
+      bar.position.set(0, 0, 7);
+      radarGroup.add(bar);
+      radarGroup.position.set(-width / 2 + cabinW / 2 + 3, 0, depth + cabinD);
+      vessel.add(radarGroup);
+
+      vessel.userData = { radar: bar };
+      return vessel;
+    }
+
+    // (B) 광진물산 HQ 본사 2단 큐브 빌딩 (벽면 와이어프레임 선 제거)
+    function buildHQCenter() {
+      const hqGroup = new THREE.Group();
+      
+      const glassMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8, // 다크모드 시인성을 위해 훨씬 밝고 화사해진 스틸 블루
+        emissive: 0x00ffcc,
+        emissiveIntensity: 0.38, // 자체 발광 강도를 대폭 높여 어둠에 묻히지 않게 조절
+        roughness: 0.15,
+        metalness: 0.85,
+        flatShading: true
+      });
+
+      // 1층
+      const f1 = new THREE.Mesh(new THREE.BoxGeometry(50, 50, 20), glassMat);
+      f1.position.set(0, 0, 10);
+      f1.castShadow = true;
+      hqGroup.add(f1);
+
+      // 2층
+      const f2 = new THREE.Mesh(new THREE.BoxGeometry(36, 36, 26), glassMat);
+      f2.position.set(0, 0, 33);
+      f2.castShadow = true;
+      hqGroup.add(f2);
+
+      // 본부 꼭대기 안테나 비콘
+      const beaconGeom = new THREE.SphereGeometry(3, 8, 8);
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+      const beacon = new THREE.Mesh(beaconGeom, beaconMat);
+      beacon.position.set(0, 0, 46);
+      hqGroup.add(beacon);
+
+      return hqGroup;
+    }
+
+    // (C) 산업용 냉동창고 (화사한 실버메탈 판넬 + 루프 쿨러 팬)
+    function buildWarehouse(isWH1) {
+      const whGroup = new THREE.Group();
+      const w = isWH1 ? 60 : 55;
+      const h = isWH1 ? 40 : 36;
+      const z = isWH1 ? 35 : 32;
+
+      const whMat = new THREE.MeshStandardMaterial({
+        color: 0x94a3b8, // 세련되고 화사한 슬레이트 그레이
+        emissive: 0xd8b4fe, // 밝은 보라빛 광원
+        emissiveIntensity: 0.15,
+        roughness: 0.25,
+        metalness: 0.75,
+        flatShading: true
+      });
+      const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, z), whMat);
+      body.position.set(0, 0, z / 2);
+      body.castShadow = true;
+      whGroup.add(body);
+
+      // 지붕 위에 2개의 쿨링 팬 추가
+      const fans = [];
+      const fanGeom = new THREE.CylinderGeometry(8, 8, 1.5, 8);
+      fanGeom.rotateX(Math.PI / 2); // 눕힘
+      const fanMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.9 });
+
+      const offsets = isWH1 ? [-14, 14] : [-12, 12];
+      offsets.forEach(offX => {
+        const fan = new THREE.Mesh(fanGeom, fanMat);
+        fan.position.set(offX, 0, z + 0.8);
+        whGroup.add(fan);
+        fans.push(fan);
+      });
+
+      whGroup.userData = { fans: fans };
+      return whGroup;
+    }
+
+    // (D) 소비처 마켓 (화사한 파스텔 핑크/오렌지 상점 + 삼각 빗각 지붕)
+    function buildBuyerMarket(isBuyer1) {
+      const marketGroup = new THREE.Group();
+      const size = isBuyer1 ? 40 : 38;
+      const z = isBuyer1 ? 30 : 28;
+      const color = isBuyer1 ? 0xff007f : 0xffb700;
+
+      const mMat = new THREE.MeshStandardMaterial({
+        color: isBuyer1 ? 0xfff0f5 : 0xffbf24, // A 식자재 마트 벽면은 화사한 파스텔 라이트 핑크/라벤더 블러쉬 컬러로 변경하여 지붕과 대비를 줌
+        emissive: isBuyer1 ? 0xff66b2 : color, // 은은하게 빛나는 핑크색 발광
+        emissiveIntensity: isBuyer1 ? 0.35 : 0.3,
+        roughness: 0.2,
+        metalness: 0.5
+      });
+
+      // 마켓 본체
+      const body = new THREE.Mesh(new THREE.BoxGeometry(size, size, z), mMat);
+      body.position.set(0, 0, z / 2);
+      body.castShadow = true;
+      marketGroup.add(body);
+
+      // 빗각 삼각 지붕 조립 (Cone 4면체형 응용)
+      const roofGeom = new THREE.ConeGeometry(size * 0.73, 14, 4);
+      roofGeom.rotateX(Math.PI / 2); // 눕힘
+      roofGeom.rotateZ(Math.PI / 4); // 45도 회전시켜 박스 방향과 일치
+      const roofMat = new THREE.MeshStandardMaterial({
+        color: isBuyer1 ? 0x00d8ff : color, // 지붕은 선명하고 시원한 네온 블루/사이언을 적용하여 투톤 대비 구현
+        emissive: isBuyer1 ? 0x00d8ff : color,
+        emissiveIntensity: isBuyer1 ? 0.45 : 0.25,
+        roughness: 0.3,
+        metalness: 0.5
+      });
+      const roof = new THREE.Mesh(roofGeom, roofMat);
+      roof.position.set(0, 0, z + 7);
+      roof.castShadow = true;
+      marketGroup.add(roof);
+
+      return marketGroup;
+    }
+
+    // (E) 수산물 유통 자율배송 3D 물고기 조립 (네온 스타일)
+    function buildFish() {
+      const fish = new THREE.Group();
+      fish.up.set(0, 0, 1); // Z-up 월드 좌표계와 일치시켜 lookAt 방향 보정
+
+      // 내부 지오메트리 그룹 (lookAt에 의한 회전과 분리하여 머리 방향을 보정)
+      const fishInner = new THREE.Group();
+      fishInner.rotation.y = -Math.PI / 2; // 머리(+X)가 lookAt 전진 방향(-Z)과 일치하도록 보정
+      fish.add(fishInner);
+
+      // 랜덤 네온 컬러 배열 (물고기마다 다른 색감)
+      const fishColors = [
+        { body: 0x00e5ff, emissive: 0x00e5ff },  // 시안
+        { body: 0x38bdf8, emissive: 0x38bdf8 },  // 스카이 블루
+        { body: 0x00ffcc, emissive: 0x00ffcc },  // 민트
+        { body: 0xff7eb3, emissive: 0xff7eb3 },  // 핑크
+        { body: 0xffb700, emissive: 0xffb700 },  // 오렌지
+      ];
+      const palette = fishColors[Math.floor(Math.random() * fishColors.length)];
+
+      // 몸통 (늘려진 타원형 구)
+      const bodyGeom = new THREE.SphereGeometry(8, 12, 10);
+      bodyGeom.scale(2.2, 0.8, 0.7); // 길쭉하고 납작한 물고기 체형
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: palette.body,
+        emissive: palette.emissive,
+        emissiveIntensity: 0.5,
+        roughness: 0.2,
+        metalness: 0.6,
+        flatShading: true
+      });
+      const body = new THREE.Mesh(bodyGeom, bodyMat);
+      body.castShadow = true;
+      fishInner.add(body);
+
+      // 꼬리지느러미 (삼각형)
+      const tailVertices = new Float32Array([
+        -16, 0, 0,     // 몸통 뒤쪽 연결점
+        -26, 0, 7,     // 꼬리 위 끝
+        -26, 0, -7,    // 꼬리 아래 끝
+      ]);
+      const tailGeom = new THREE.BufferGeometry();
+      tailGeom.setAttribute('position', new THREE.BufferAttribute(tailVertices, 3));
+      tailGeom.computeVertexNormals();
+      const tailMat = new THREE.MeshStandardMaterial({
+        color: palette.body,
+        emissive: palette.emissive,
+        emissiveIntensity: 0.65,
+        roughness: 0.3,
+        metalness: 0.5,
+        side: THREE.DoubleSide,
+        flatShading: true
+      });
+      const tail = new THREE.Mesh(tailGeom, tailMat);
+      tail.castShadow = true;
+      fishInner.add(tail);
+
+      // 등지느러미 (삼각형)
+      const dorsalVertices = new Float32Array([
+        4, 0, 5,       // 앞쪽 연결점
+        -6, 0, 5,      // 뒤쪽 연결점
+        -1, 0, 12,     // 꼭대기
+      ]);
+      const dorsalGeom = new THREE.BufferGeometry();
+      dorsalGeom.setAttribute('position', new THREE.BufferAttribute(dorsalVertices, 3));
+      dorsalGeom.computeVertexNormals();
+      const dorsal = new THREE.Mesh(dorsalGeom, tailMat);
+      fishInner.add(dorsal);
+
+      // 가슴지느러미 (좌/우 작은 삼각형)
+      const pectoralVertices = new Float32Array([
+        4, 5, -1,
+        -2, 5, -1,
+        1, 10, -3,
+      ]);
+      const pectoralGeom = new THREE.BufferGeometry();
+      pectoralGeom.setAttribute('position', new THREE.BufferAttribute(pectoralVertices, 3));
+      pectoralGeom.computeVertexNormals();
+
+      const finL = new THREE.Mesh(pectoralGeom, tailMat);
+      fishInner.add(finL);
+
+      const finR = new THREE.Mesh(pectoralGeom, tailMat);
+      finR.scale.y = -1; // 반대편으로 미러링
+      fishInner.add(finR);
+
+      // 눈 (좌/우 작은 흰색 구)
+      const eyeGeom = new THREE.SphereGeometry(1.2, 8, 8);
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const eyeL = new THREE.Mesh(eyeGeom, eyeMat);
+      eyeL.position.set(12, 4, 2);
+      fishInner.add(eyeL);
+
+      const eyeR = new THREE.Mesh(eyeGeom, eyeMat);
+      eyeR.position.set(12, -4, 2);
+      fishInner.add(eyeR);
+
+      // 눈동자 (검은 점)
+      const pupilGeom = new THREE.SphereGeometry(0.6, 6, 6);
+      const pupilMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+      const pupilL = new THREE.Mesh(pupilGeom, pupilMat);
+      pupilL.position.set(13, 4.5, 2.3);
+      fishInner.add(pupilL);
+
+      const pupilR = new THREE.Mesh(pupilGeom, pupilMat);
+      pupilR.position.set(13, -4.5, 2.3);
+      fishInner.add(pupilR);
+
+      fish.scale.set(0.55, 0.55, 0.55);
+      return fish;
+    }
+
+    // 7. 노드 그룹 맵 배치 및 메쉬 주입
+    const nodes = {
+      node_vessel_1: { x: 80, y: 260, label: "광진501호 (원양)", sub: "어획감시 ON", color: "#00e5ff", mesh: buildVessel(true) },
+      node_vessel_2: { x: 190, y: 520, label: "동해 조업선 (연안)", sub: "VESSEL ACTIVE", color: "#0088ff", mesh: buildVessel(false) },
+      node_vessel_3: { x: 220, y: 220, label: "남해 조업선 (연안)", sub: "VESSEL ACTIVE", color: "#00ffcc", mesh: buildVessel(false) },
+      node_vessel_4: { x: 120, y: 80, label: "제주 수송선 (연안)", sub: "VESSEL ACTIVE", color: "#d8b4fe", mesh: buildVessel(false) },
+      node_hq: { x: 400, y: 360, label: "광진물산 HQ 본부", sub: "CONTROL CENTER", color: "#00ffcc", mesh: buildHQCenter() },
+      node_warehouse_1: { x: 470, y: 220, label: "제1외부 냉동창고", sub: "WH_STOCK: 24K", color: "#9d4edd", mesh: buildWarehouse(true) },
+      node_warehouse_2: { x: 470, y: 480, label: "제2외부 냉동창고", sub: "WH_STOCK: 18K", color: "#9d4edd", mesh: buildWarehouse(false) },
+      node_buyer_1: { x: 750, y: 160, label: "A 식자재 마트", sub: "REGULAR BUYER", color: "#ff007f", mesh: buildBuyerMarket(true) },
+      node_buyer_2: { x: 900, y: 560, label: "자갈치 도매상회", sub: "FLEXIBLE BUYER", color: "#ffb700", mesh: buildBuyerMarket(false) },
+      node_buyer_3: { x: 920, y: 340, label: "서면 수산백화점", sub: "PREMIUM BUYER", color: "#ff007f", mesh: buildBuyerMarket(false) }
+    };
+
+    Object.keys(nodes).forEach(key => {
+      const info = nodes[key];
+      const meshGroup = info.mesh;
+      meshGroup.position.set(info.x, info.y, 0);
+      scene.add(meshGroup);
+      
+      // 바닥 글씨 라벨 연동
+      createLabelDecal(info.label, info.sub, info.color, info.x, info.y);
+    });
+
+    // 8. 3D 베지에 도로망 & 항로 생성 및 렌더링
+    const curves = {
+      line_v1_hq: new THREE.CubicBezierCurve3(
+        new THREE.Vector3(80, 260, 0),
+        new THREE.Vector3(100, 380, 0),
+        new THREE.Vector3(260, 390, 0),
+        new THREE.Vector3(400, 360, 0)
+      ),
+      line_v2_hq: new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(190, 520, 0),
+        new THREE.Vector3(300, 560, 0),
+        new THREE.Vector3(400, 360, 0)
+      ),
+      line_v3_hq: new THREE.CubicBezierCurve3(
+        new THREE.Vector3(220, 220, 0),
+        new THREE.Vector3(230, 290, 0),
+        new THREE.Vector3(320, 310, 0),
+        new THREE.Vector3(400, 360, 0)
+      ),
+      line_v4_hq: new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(120, 80, 0),
+        new THREE.Vector3(350, 100, 0),
+        new THREE.Vector3(400, 360, 0)
+      ),
+      line_hq_wh1: new THREE.CubicBezierCurve3(
+        new THREE.Vector3(400, 360, 0),
+        new THREE.Vector3(450, 370, 0),
+        new THREE.Vector3(410, 270, 0),
+        new THREE.Vector3(470, 220, 0)
+      ),
+      line_hq_wh2: new THREE.CubicBezierCurve3(
+        new THREE.Vector3(400, 360, 0),
+        new THREE.Vector3(450, 350, 0),
+        new THREE.Vector3(410, 450, 0),
+        new THREE.Vector3(470, 480, 0)
+      ),
+      line_wh1_buyer1: new THREE.CubicBezierCurve3(
+        new THREE.Vector3(470, 220, 0),
+        new THREE.Vector3(560, 80, 0),
+        new THREE.Vector3(660, 300, 0),
+        new THREE.Vector3(750, 160, 0)
+      ),
+      line_wh2_buyer2: new THREE.CubicBezierCurve3(
+        new THREE.Vector3(470, 480, 0),
+        new THREE.Vector3(540, 640, 0),
+        new THREE.Vector3(820, 380, 0),
+        new THREE.Vector3(900, 560, 0)
+      ),
+      line_wh1_buyer3: new THREE.CubicBezierCurve3(
+        new THREE.Vector3(470, 220, 0),
+        new THREE.Vector3(600, 380, 0),
+        new THREE.Vector3(750, 120, 0),
+        new THREE.Vector3(920, 340, 0)
+      )
+    };
+
+    // 각 어선의 출발 항로 접선 각도 계산 (뱃머리를 곡선 진행 방향과 일치화)
+    const yaw1 = Math.atan2(curves.line_v1_hq.getTangentAt(0).y, curves.line_v1_hq.getTangentAt(0).x);
+    const yaw2 = Math.atan2(curves.line_v2_hq.getTangentAt(0).y, curves.line_v2_hq.getTangentAt(0).x);
+    const yaw3 = Math.atan2(curves.line_v3_hq.getTangentAt(0).y, curves.line_v3_hq.getTangentAt(0).x);
+    const yaw4 = Math.atan2(curves.line_v4_hq.getTangentAt(0).y, curves.line_v4_hq.getTangentAt(0).x);
+
+    const lineObjects = {};
+    Object.keys(curves).forEach(key => {
+      const curve = curves[key];
+      const isRoad = key.startsWith('line_wh');
+      
+      // 도로 및 항로를 얇고 은은하게 빛나는 3D 튜브(원통관)로 렌더링
+      const geometry = new THREE.TubeGeometry(curve, 45, isRoad ? 0.45 : 0.25, 8, false);
+      const color = isRoad ? 0x00a8ff : (key.includes('v1') ? 0x00e5ff : (key.includes('v3') ? 0x00ffcc : 0xffb700));
+      
+      // 물흐르는 점선 텍스처 바인딩
+      const textureColor = color === 0x00a8ff ? "#00a8ff" : (color === 0x00e5ff ? "#00e5ff" : (color === 0x00ffcc ? "#00ffcc" : (color === 0xd8b4fe ? "#d8b4fe" : "#ffb700")));
+      const texture = createDashedTexture(textureColor);
+      
+      // 더 촘촘한 점선 연출을 위해 나눗셈 인자를 15에서 9로 낮추어 분할 증가
+      const repeatCount = Math.max(8, Math.round(curve.getLength() / 9));
+      texture.repeat.set(repeatCount, 1);
+
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: isRoad ? 0.33 : 0.48 // 점선의 밝기를 1단계 하향하여 눈부심 해소
+      });
+      const tube = new THREE.Mesh(geometry, material);
+      scene.add(tube);
+      lineObjects[key] = tube;
+    });
+
+    // 9. 동적 3D 자율주행 차량(트럭) 배치 (속도 다변화 및 딜레이 튜닝)
+    const trucks = [
+      { mesh: buildFish(), curve: curves.line_wh1_buyer1, speed: 0.002 + Math.random() * 0.0016, progress: 0.0, delay: 0.0 },
+      { mesh: buildFish(), curve: curves.line_wh1_buyer1, speed: 0.002 + Math.random() * 0.0016, progress: 0.0, delay: 0.6 },
+      { mesh: buildFish(), curve: curves.line_wh2_buyer2, speed: 0.002 + Math.random() * 0.0016, progress: 0.0, delay: 0.0 },
+      { mesh: buildFish(), curve: curves.line_wh2_buyer2, speed: 0.002 + Math.random() * 0.0016, progress: 0.0, delay: 0.6 },
+      { mesh: buildFish(), curve: curves.line_wh1_buyer3, speed: 0.002 + Math.random() * 0.0016, progress: 0.0, delay: 0.3 }
+    ];
+
+    trucks.forEach(t => {
+      scene.add(t.mesh);
+      t.mesh.visible = false;
+    });
+
+    // 10. 시뮬레이터 구체 데이터 펄스 방출 엔진
+    const particleGroup = new THREE.Group();
+    scene.add(particleGroup);
+
+    function triggerDataPulse(curve, color) {
+      const pGeom = new THREE.SphereGeometry(4.5, 12, 12);
+      const pMat = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending
+      });
+      const pMesh = new THREE.Mesh(pGeom, pMat);
+      particleGroup.add(pMesh);
+
+      const duration = 2.4; // 2.4초간 기동
+      const startT = clock.getElapsedTime();
+
+      function updatePulse() {
+        const elapsed = clock.getElapsedTime() - startT;
+        const ratio = Math.min(1.0, elapsed / duration);
+        
+        const pos = curve.getPointAt(ratio);
+        pMesh.position.copy(pos);
+        pMesh.position.z += 9; // 약간 공중에 부양하여 펄스 느낌 강조
+        
+        if (ratio < 1.0) {
+          requestAnimationFrame(updatePulse);
+        } else {
+          particleGroup.remove(pMesh);
+          pGeom.dispose();
+          pMat.dispose();
+        }
+      }
+      updatePulse();
+    }
+
+    // ----------------------------------------------------
+    // [4] 자율 물류 시뮬레이션 제어 루프
+    // ----------------------------------------------------
+    let activeScenarioIdx = 0;
+
+    function runLogisticsSimulation() {
+      // 1. 3D 노드 발광 색상 초기화
+      Object.keys(nodes).forEach(key => {
+        const mesh = nodes[key].mesh;
+        mesh.scale.set(1.0, 1.0, 1.0);
+      });
+
+      const s = scenarios[activeScenarioIdx];
+
+      // 2. 연동된 3D 노드 크기 펄스 스케일링
+      s.activeNodes.forEach(nodeKey => {
+        const node = nodes[nodeKey];
+        if (node) {
+          // 크기를 펄스처럼 키워서 강조
+          node.mesh.scale.set(1.15, 1.15, 1.15);
+        }
+      });
+
+      // 5. 3D 데이터 구체 발송 (시나리오 1, 2, 3)
+      if (s.id !== 4) {
+        const targetCurve = curves[s.pathId];
+        triggerDataPulse(targetCurve, s.accent);
+      }
+
+      // 누적 유통 물량 증가 연출
+      const logisticsEl = document.getElementById('total-logistics');
+      if (logisticsEl) {
+        let curVal = parseFloat(logisticsEl.textContent);
+        curVal += (0.15 + Math.random() * 0.4);
+        logisticsEl.innerHTML = `${curVal.toFixed(1)} <span class="stat-unit">TONS</span>`;
+      }
+
+      // 배송 완료 건수 카운트 증가 연출
+      const casesEl = document.getElementById('cases-count');
+      if (casesEl) {
+        let curCases = parseInt(casesEl.innerText);
+        curCases += Math.random() > 0.45 ? 1 : 0;
+        casesEl.innerText = curCases;
+      }
+
+      activeScenarioIdx = (activeScenarioIdx + 1) % scenarios.length;
+    }
+
+    // ----------------------------------------------------
+    // [5] 3D 카메라 뷰포트 드래그 & 보간 제어
+    // ----------------------------------------------------
+    let is2D = false;
+    let isTransitioning = false;
+
+    function apply3DTransform() {
+      // Three.js 궤도 컨트롤 갱신
+      controls.update();
+    }
+
+    function toggle2D3D() {
+      is2D = !is2D;
+      const btn = document.getElementById('btnToggle2D');
+      if (is2D) {
+        btn.classList.add('active');
+        controls.autoRotate = false;
+        document.getElementById('btnOrbit').classList.remove('active');
+        
+        targetCamPos.set(500, 375, 750); // 탑 뷰
+        targetLookAt.set(500, 375, 0);
+        controls.enabled = false; // 드래그 회전 비활성화
+        isTransitioning = true;
+      } else {
+        btn.classList.remove('active');
+        targetCamPos.set(500, -320, 540); // 3D 시점 리턴 (추가 눕힘 + 추가 축소 기본값)
+        targetLookAt.set(500, 375, 0);
+        
+        // 3D 복귀 시 OrbitControls의 각도 고착 방지를 위해 강제 복사 후 업데이트
+        camera.position.copy(targetCamPos);
+        controls.target.copy(targetLookAt);
+        controls.update();
+        controls.enabled = true;
+        isTransitioning = true;
+      }
+    }
+
+    function centerFocus() {
+      if (is2D) {
+        targetCamPos.set(500, 375, 750);
+        targetLookAt.set(500, 375, 0);
+      } else {
+        targetCamPos.set(500, -320, 540); // 추가 눕힘 + 추가 축소 기본값 리셋
+        targetLookAt.set(500, 375, 0);
+      }
+      isTransitioning = true;
+    }
+
+    // 에이전트 상세 정보 페이지로 이동
+    function goToAgentDetail(agentId) {
+      window.location.href = `agent_detail.html?agent=${agentId}`;
+    }
+
+    // 에이전트 클릭 시 해당 도메인 노드로 카메라 자동 포커스 비행 (3D 뷰 연동 유지용)
+    function focusAgent(type) {
+      if (is2D) toggle2D3D(); // 2D 모드일 경우 3D 모드로 자동 복귀 후 포커싱
+      
+      if (type === 'preorder') {
+        // 본사 부근으로 포커스
+        targetLookAt.set(400, 360, 0);
+        targetCamPos.set(400, 240, 200);
+      } else if (type === 'inventory') {
+        // 제1외부 냉동창고 부근으로 포커스
+        targetLookAt.set(500, 200, 0);
+        targetCamPos.set(500, -100, 320);
+      } else if (type === 'prediction') {
+        // 본사 부근으로 포커스
+        targetLookAt.set(500, 375, 0);
+        targetCamPos.set(500, 150, 280);
+      } else if (type === 'ledger') {
+        // 본사와 창고 중간지점 조망
+        targetLookAt.set(500, 280, 0);
+        targetCamPos.set(500, 0, 300);
+      } else if (type === 'dispatch') {
+        // 전체 도로망 및 트럭 경로 조망 (리셋 뷰)
+        centerFocus();
+      }
+      isTransitioning = true;
+    }
+
+    // 에이전트별 실시간 상황 로그 데이터
+    const agentLogs = {
+      preorder: [
+        "과거 발주 패턴 분석 및 예측 제안 대기 중...",
+        "고정 수요처(A 식자재 마트) D+1 발주 제안 생성 완료",
+        "예측 물량 50박스 사전 픽업 대기 지시",
+        "카카오 알림톡 발주 추천 메시지 발송 완료",
+        "수요처 수락에 따른 즉시 출고 예약 동기화",
+        "선제발주 신뢰도 지수 검증 완료 (적중률 85%)"
+      ],
+      inventory: [
+        "보관창고 상태 실시간 관제 중...",
+        "제1외부 냉동창고 적정 온도 감시 중 (-18.4°C)",
+        "제2외부 냉동창고 재고 수입 동기화 중...",
+        "수산물 상자 적치율 78.8% 감지 완료",
+        "보관창고 습도 최적 레벨 유지 중 (45%)",
+        "냉동설비 가동률 NORMAL 진단 완료"
+      ],
+      prediction: [
+        "주간 수급 및 가격 트렌드 실시간 분석 중...",
+        "제주 수송선 조업 데이터 기반 수급 예측 중...",
+        "소비처(A 식자재 마트) 수요 급증 제안 생성",
+        "자갈치 도매상회 발주 패턴 머신러닝 분석 중",
+        "서면 수산백화점 실시간 유통 마진 시뮬레이션 중",
+        "다음주 냉동 고등어 가격 3.2% 하락 예측 알림"
+      ],
+      ledger: [
+        "블록체인 분산 원장 트랜잭션 동기화 완료",
+        "인바운드 냉동 수산물 입고 확인서 해시 생성 완료",
+        "광진 501호 조업 원산지 증명 스마트 컨트랙트 서명",
+        "본사-창고 이송 트랜잭션 블록 추가 완료",
+        "분산 원장 노드 무결성 검증 완료 (합의 100%)",
+        "Cold-Chain 이력 검증 해시 원장 업로드 완료"
+      ],
+      dispatch: [
+        "차량 배차 및 이송 경로 실시간 최적화 중...",
+        "자율수송 트럭 3호기 배차 최적 경로 생성 완료",
+        "남해 조업선 회피 항로 연동 완료 (선박 충돌 방지)",
+        "동해 조업선 항만 접안 최적 루트 배정 중...",
+        "부산 도심 도로 정체 우회 대체 도로 배정 완료",
+        "창고-마트 자율 배송 이송 펄스 신호 모니터링 중"
+      ]
+    };
+
+    let currentLogIndexes = { preorder: 0, inventory: 0, prediction: 0, ledger: 0, dispatch: 0 };
+    
+    function rollAgentLogs() {
+      const keys = ['preorder', 'inventory', 'prediction', 'ledger', 'dispatch'];
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+      
+      currentLogIndexes[randomKey] = (currentLogIndexes[randomKey] + 1) % agentLogs[randomKey].length;
+      const newLogText = agentLogs[randomKey][currentLogIndexes[randomKey]];
+      
+      const logElement = document.getElementById(`log-${randomKey}`);
+      if (logElement) {
+        logElement.style.opacity = 0;
+        setTimeout(() => {
+          logElement.innerText = newLogText;
+          logElement.style.opacity = 1;
+        }, 200);
+      }
+    }
+    
+    // 3.5초 간격으로 에이전트 로그를 자연스럽게 롤링시킴
+    setInterval(rollAgentLogs, 3500);
+
+    // 에이전트 카드 마우스 호버(mouseenter/mouseleave) 제어 스크립트
+    // 의도치 않은 마우스 이탈 시 흔들림을 방지하기 위한 지연 시간(Debounce) 적용
+    document.querySelectorAll('.agent-card').forEach(card => {
+      let leaveTimeout;
+      
+      card.addEventListener('mouseenter', () => {
+        // 닫기 대기 타이머가 있다면 취소
+        if (leaveTimeout) clearTimeout(leaveTimeout);
+        // 즉시 확장 클래스 적용
+        card.classList.add('hovered');
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        // 바로 들어가지 않고 150ms 대기 후 클래스 제거
+        leaveTimeout = setTimeout(() => {
+          card.classList.remove('hovered');
+        }, 150);
+      });
+    });
+
+    function toggleOrbit() {
+      if (is2D) toggle2D3D();
+      controls.autoRotate = !controls.autoRotate;
+      const btn = document.getElementById('btnOrbit');
+      if (controls.autoRotate) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    }
+
+    function zoomIn() {
+      const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+      offset.multiplyScalar(0.75); // 줌인 배율
+      targetCamPos.copy(controls.target).add(offset);
+      isTransitioning = true;
+    }
+
+    function zoomOut() {
+      const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+      offset.multiplyScalar(1.3); // 줌아웃 배율
+      targetCamPos.copy(controls.target).add(offset);
+      isTransitioning = true;
+    }
+
+    // ----------------------------------------------------
+    // [5.1] 3D 노드 클릭 시 해당 노드로 카메라 확대 포커스 비행
+    // ----------------------------------------------------
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // 클릭 가능한 노드 메쉬 목록 (재귀적으로 모든 하위 메쉬 포함)
+    function getClickableObjects() {
+      const clickable = [];
+      Object.keys(nodes).forEach(key => {
+        nodes[key].mesh.traverse(child => {
+          if (child.isMesh) {
+            child.userData.nodeKey = key; // 원본 노드 키를 메쉬에 기록
+            clickable.push(child);
+          }
+        });
+      });
+      return clickable;
+    }
+
+    let focusedNodeKey = null; // 현재 포커스된 노드 추적
+
+    renderer.domElement.addEventListener('click', (event) => {
+      // 마우스 클릭 좌표를 정규화 디바이스 좌표(-1 ~ +1)로 변환
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+
+      const clickable = getClickableObjects();
+      const intersects = raycaster.intersectObjects(clickable, false);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0].object;
+        const nodeKey = hit.userData.nodeKey;
+
+        if (nodeKey && nodes[nodeKey]) {
+          const nodeInfo = nodes[nodeKey];
+          const nodePos = nodeInfo.mesh.position;
+
+          // 같은 노드를 다시 클릭하면 전체 뷰(리셋)로 복귀
+          if (focusedNodeKey === nodeKey) {
+            focusedNodeKey = null;
+            centerFocus();
+            return;
+          }
+
+          focusedNodeKey = nodeKey;
+
+          // 2D 모드일 경우 3D로 자동 복귀 후 포커싱
+          if (is2D) toggle2D3D();
+
+          // 노드 정면 약 45도 위에서 바라보는 확대 카메라 위치 계산
+          targetLookAt.set(nodePos.x, nodePos.y, 0);
+          targetCamPos.set(nodePos.x, nodePos.y - 120, 180);
+          isTransitioning = true;
+
+          // 자동 회전 일시 정지 (포커스 유지를 위해)
+          controls.autoRotate = false;
+          document.getElementById('btnOrbit').classList.remove('active');
+        }
+      }
+    });
+
+    // 마우스 커서 변경 (호버 시 pointer 커서로 바꿔 클릭 가능성 힌트 제공)
+    renderer.domElement.addEventListener('mousemove', (event) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const clickable = getClickableObjects();
+      const intersects = raycaster.intersectObjects(clickable, false);
+
+      renderer.domElement.style.cursor = intersects.length > 0 ? 'pointer' : '';
+    });
+    // [6] 실시간 렌더링 루프 (애니메이션)
+    // ----------------------------------------------------
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const time = clock.getElapsedTime();
+
+      // 1. 로우폴리 바다 잔물결 파동 애니메이션
+      const posAttr = seaGeom.attributes.position;
+      for (let i = 0; i < posAttr.count; i++) {
+        const x = posAttr.getX(i);
+        const y = posAttr.getY(i);
+        // 은은하고 자연스러운 파도 파동 공식 (진폭을 1.5로 줄여 도로망 Z=0 높이 위로 바다가 범람해 선이 끊기는 현상 차단)
+        const z = Math.sin(x * 0.008 + time * 0.9) * 1.5 + Math.cos(y * 0.012 + time * 0.7) * 1.5;
+        posAttr.setZ(i, z);
+      }
+      posAttr.needsUpdate = true;
+      seaGeom.computeVertexNormals();
+
+      // 2. 어선 둥실거리는 롤링 기믹 (각각 계산된 선로 접선 각도에 뱃머리를 일치시킴)
+      const roll1 = Math.sin(time * 1.5) * 0.04;
+      const pitch1 = Math.cos(time * 1.8) * 0.04;
+      nodes.node_vessel_1.mesh.rotation.set(roll1, pitch1, yaw1);
+      nodes.node_vessel_1.mesh.position.z = Math.sin(time * 1.5) * 1.5;
+
+      const roll2 = Math.sin(time * 1.3 + 2.0) * 0.035;
+      const pitch2 = Math.cos(time * 1.6 + 1.5) * 0.035;
+      nodes.node_vessel_2.mesh.rotation.set(roll2, pitch2, yaw2);
+      nodes.node_vessel_2.mesh.position.z = Math.cos(time * 1.3) * 1.2;
+
+      const roll3 = Math.sin(time * 1.4 + 1.0) * 0.038;
+      const pitch3 = Math.cos(time * 1.7 + 0.8) * 0.038;
+      nodes.node_vessel_3.mesh.rotation.set(roll3, pitch3, yaw3);
+      nodes.node_vessel_3.mesh.position.z = Math.sin(time * 1.4) * 1.3;
+
+      const roll4 = Math.sin(time * 1.6 + 0.5) * 0.035;
+      const pitch4 = Math.cos(time * 1.9 + 1.2) * 0.035;
+      nodes.node_vessel_4.mesh.rotation.set(roll4, pitch4, yaw4);
+      nodes.node_vessel_4.mesh.position.z = Math.sin(time * 1.6) * 1.1;
+
+      // 어선 레이더 안테나 끊임없는 고속 회전
+      if (nodes.node_vessel_1.mesh.userData.radar) {
+        nodes.node_vessel_1.mesh.userData.radar.rotation.z += 0.08;
+      }
+      if (nodes.node_vessel_2.mesh.userData.radar) {
+        nodes.node_vessel_2.mesh.userData.radar.rotation.z += 0.08;
+      }
+      if (nodes.node_vessel_3.mesh.userData.radar) {
+        nodes.node_vessel_3.mesh.userData.radar.rotation.z += 0.08;
+      }
+      if (nodes.node_vessel_4.mesh.userData.radar) {
+        nodes.node_vessel_4.mesh.userData.radar.rotation.z += 0.08;
+      }
+
+      // 3. 냉동창고 위 쿨링 팬 회전
+      Object.keys(nodes).forEach(key => {
+        const n = nodes[key];
+        if (n.mesh.userData.fans) {
+          n.mesh.userData.fans.forEach(fan => {
+            fan.rotation.z += 0.06;
+          });
+        }
+      });
+
+      // 3.10 상단 상황판 창고 가동률 미세 진동 연출 (실시간 관제 무드 극대화)
+      const warehouseEl = document.getElementById('warehouse-util');
+      if (warehouseEl) {
+        const utilVal = 78.5 + Math.sin(time * 0.5) * 0.8;
+        warehouseEl.innerHTML = `${utilVal.toFixed(1)} <span class="stat-unit">%</span>`;
+      }
+
+      // 3.14 상단 상황판 콜드체인 온도 미세 진동 연출
+      const tempEl = document.getElementById('temp-count');
+      if (tempEl) {
+        const tempVal = -18.5 + Math.sin(time * 1.5) * 0.2;
+        tempEl.innerText = `${tempVal.toFixed(1)} °C`;
+      }
+
+      // 3. 3.5 모든 노선망 물흐르는 점선 효과 구현 (텍스처 오프셋 스크롤 및 강제 갱신)
+      Object.keys(lineObjects).forEach(key => {
+        const tube = lineObjects[key];
+        if (tube.material.map) {
+          // 물류의 진행 방향에 맞춰서 점선이 앞으로 이동하도록 스크롤
+          tube.material.map.offset.x -= 0.007;
+          tube.material.map.needsUpdate = true; // 캔버스 텍스처 내부 오프셋 갱신 보장
+        }
+      });
+
+      // 4. 자율주행 트럭 4대 곡선 도로 주행 및 lookAt 접선 각도 처리
+      trucks.forEach(t => {
+        // 딜레이에 따른 순차 출격
+        if (time < t.delay) return;
+        t.mesh.visible = true;
+
+        t.progress += t.speed;
+        if (t.progress > 1.0) {
+          t.progress = 0.0;
+          // 완주 후 다시 주행 시 속도를 랜덤하게 갱신하여 획일적인 배치 방지 (추월/정체 연출)
+          t.speed = 0.0018 + Math.random() * 0.0022;
+        }
+
+        const pos = t.curve.getPointAt(t.progress);
+        const tangent = t.curve.getTangentAt(t.progress);
+
+        t.mesh.position.copy(pos);
+        // 트럭은 지상 도로망 위를 달리므로 높이 Z=1.0 오프셋
+        t.mesh.position.z += 1.0;
+
+        // 진행 방향 접선 렌더링 정렬
+        const targetLook = pos.clone().add(tangent);
+        t.mesh.lookAt(targetLook);
+      });
+
+      // 5. 카메라 및 컨트롤러 부드러운 Lerp 비행 이동 (수동 조작 중이 아닐 때만 실행)
+      if (isTransitioning) {
+        camera.position.lerp(targetCamPos, 0.07);
+        controls.target.lerp(targetLookAt, 0.07);
+        
+        // 목적지 근처 도달 시 가속 보간 해제
+        if (camera.position.distanceTo(targetCamPos) < 0.5 && controls.target.distanceTo(targetLookAt) < 0.5) {
+          isTransitioning = false;
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // ----------------------------------------------------
+    // [8] 실시간 SVG 꺾은선 차트 모니터링 엔진
+    // ----------------------------------------------------
+    let chartData1 = [25, 18, 30, 15, 28, 10, 32, 22, 35, 20, 28, 15];
+    let chartData2 = [15, 28, 12, 32, 18, 28, 15, 30, 8, 22, 12, 25];
+
+    function renderLiveChart(pathId, groupId, dataArr, nodeClass) {
+      const pathEl = document.getElementById(pathId);
+      const groupEl = document.getElementById(groupId);
+      if (!pathEl || !groupEl) return;
+
+      const width = 280; // 가로 2칸 합쳐진 넓이에 맞게 280px로 변경
+      const step = width / (dataArr.length - 1);
+      
+      let d = "";
+      let nodesHTML = "";
+      
+      dataArr.forEach((y, i) => {
+        const x = i * step;
+        const renderY = 40 - y; // Y축 방향 뒤집기 (최대 40)
+        if (i === 0) {
+          d += `M${x},${renderY}`;
+        } else {
+          d += ` L${x},${renderY}`;
+        }
+        nodesHTML += `<circle class="chart-node ${nodeClass}" cx="${x}" cy="${renderY}" r="1.5" />`;
+      });
+      
+      pathEl.setAttribute('d', d);
+      groupEl.innerHTML = nodesHTML;
+    }
+
+    function updateLiveLineCharts() {
+      chartData1.shift();
+      let lastY1 = chartData1[chartData1.length - 1];
+      let newY1 = Math.max(5, Math.min(35, lastY1 + (Math.random() * 12 - 6)));
+      chartData1.push(newY1);
+
+      chartData2.shift();
+      let lastY2 = chartData2[chartData2.length - 1];
+      let newY2 = Math.max(5, Math.min(35, lastY2 + (Math.random() * 14 - 7)));
+      chartData2.push(newY2);
+
+      renderLiveChart('lineChart1', 'lineNodes1', chartData1, 'node-c1');
+      renderLiveChart('lineChart2', 'lineNodes2', chartData2, 'node-c2');
+    }
+
+    // ----------------------------------------------------
+    // [7] 초기화 바인딩
+    // ----------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      // 3D 렌더러 동작 개시
+      animate();
+
+      // 시뮬레이터 최초 기동 및 4.8초 주기 가동
+      runLogisticsSimulation();
+      setInterval(runLogisticsSimulation, 4800);
+
+      // 실시간 SVG 차트 렌더링 및 1.2초 주기 갱신 가동
+      renderLiveChart('lineChart1', 'lineNodes1', chartData1, 'node-c1');
+      renderLiveChart('lineChart2', 'lineNodes2', chartData2, 'node-c2');
+      setInterval(updateLiveLineCharts, 1200);
+    });
+  </script>
+</body>
+</html>
