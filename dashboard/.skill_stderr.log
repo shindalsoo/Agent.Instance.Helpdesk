@@ -117,3 +117,11 @@ INFO:     172.18.0.2:41704 - "GET /index.html HTTP/1.1" 200 OK
 INFO:     172.18.0.2:49524 - "GET /index.html HTTP/1.1" 200 OK
 INFO:     172.18.0.2:51524 - "GET /agent_detail.html?agent=ledger HTTP/1.1" 200 OK
 INFO:     172.18.0.2:59926 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:52444 - "GET /index.html HTTP/1.1" 200 OK
+INFO:     172.18.0.2:52452 - "GET /assets/agent_prediction_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:52460 - "GET /assets/agent_inventory_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:52496 - "GET /assets/seafood_logistics_bg.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:52488 - "GET /assets/agent_ledger_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:52472 - "GET /assets/agent_dispatch_thumbnail.png HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54386 - "GET /agent_detail.html?agent=inventory HTTP/1.1" 200 OK
+INFO:     172.18.0.2:54388 - "GET /index.html HTTP/1.1" 200 OK
